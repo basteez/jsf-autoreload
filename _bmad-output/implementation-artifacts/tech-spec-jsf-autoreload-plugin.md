@@ -2,7 +2,7 @@
 title: 'JSF Autoreload Plugin'
 slug: 'jsf-autoreload-plugin'
 created: '2026-03-12'
-status: 'ready-for-dev'
+status: 'completed'
 stepsCompleted: [1, 2, 3, 4]
 tech_stack: ['Java 11+', 'Gradle 7+', 'io.methvin:directory-watcher', 'javax.servlet-api:4.0.1', 'org.java-websocket:Java-WebSocket:1.5.+', 'io.openliberty.tools:liberty-gradle-plugin']
 files_to_modify: ['jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/JsfAutoreloadPlugin.java', 'jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/JsfPrepareTask.java', 'jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/JsfDevTask.java', 'jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/JsfAutoreloadExtension.java', 'jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/watcher/FileChangeWatcher.java', 'jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/websocket/DevWebSocketServer.java', 'jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/server/ServerAdapter.java', 'jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/server/liberty/LibertyServerAdapter.java', 'jsf-autoreload-runtime/src/main/java/io/github/tizianobasile/jsfautoreload/filter/DevModeFilter.java', 'jsf-autoreload-runtime/src/main/resources/META-INF/web-fragment.xml']
@@ -153,60 +153,60 @@ jsfPrepare → libertyStart → jsfDev
 
 ### Tasks
 
-- [ ] **Task 1: Root project scaffolding**
+- [x] **Task 1: Root project scaffolding**
   - File: `settings.gradle.kts`
   - Action: Create root settings file with `rootProject.name = "jsf-autoreload"` and `include("jsf-autoreload-plugin", "jsf-autoreload-runtime")`.
   - File: `build.gradle.kts` (root)
   - Action: Empty root build file (no shared configuration needed in v1).
 
-- [ ] **Task 2: Plugin subproject build file**
+- [x] **Task 2: Plugin subproject build file**
   - File: `jsf-autoreload-plugin/build.gradle.kts`
   - Action: Apply plugins: `java-gradle-plugin`, `maven-publish`, `com.github.johnrengelman.shadow` (version `8.+`). Declare dependencies: `gradleApi()` (implementation), `io.methvin:directory-watcher:0.18.+` (implementation), `org.java-websocket:Java-WebSocket:1.5.+` (implementation), `io.openliberty.tools:liberty-gradle-plugin:3.+` (compileOnly). Create custom configuration `runtimeJar` and add `project(":jsf-autoreload-runtime")` as its dependency. Register plugin: `gradlePlugin { plugins { create("jsfAutoreload") { id = "it.bstz.jsf-autoreload"; implementationClass = "it.bstz.jsfautoreload.JsfAutoreloadPlugin" } } }`. Configure Shadow: `shadowJar { relocate("org.java_websocket", "it.bstz.shaded.java_websocket") }`.
   - Notes: The `runtimeJar` configuration is what makes the runtime JAR available to `JsfPrepareTask` without classpath reflection.
 
-- [ ] **Task 3: Runtime subproject build file**
+- [x] **Task 3: Runtime subproject build file**
   - File: `jsf-autoreload-runtime/build.gradle.kts`
   - Action: Apply `java-library` and `maven-publish`. Declare `javax.servlet:javax.servlet-api:4.0.1` as `compileOnly` — no runtime dependencies. Configure: `jar { manifest { attributes("Web-Fragment-Name" to "jsf-autoreload") } }`.
 
-- [ ] **Task 4: Gradle plugin properties file**
+- [x] **Task 4: Gradle plugin properties file**
   - File: `jsf-autoreload-plugin/src/main/resources/META-INF/gradle-plugins/it.bstz.jsf-autoreload.properties`
   - Action: Create file with single line: `implementation-class=it.bstz.jsfautoreload.JsfAutoreloadPlugin`
 
-- [ ] **Task 5: ServerAdapter interface**
+- [x] **Task 5: ServerAdapter interface**
   - File: `jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/server/ServerAdapter.java`
   - Action: Create `public interface ServerAdapter` with three methods: `boolean isRunning()`, `int getHttpPort()`, `String getContextRoot()`. No lifecycle methods.
   - Notes: This is the v2 extension point. Keep it minimal.
 
-- [ ] **Task 6: JsfAutoreloadExtension — Gradle DSL**
+- [x] **Task 6: JsfAutoreloadExtension — Gradle DSL**
   - File: `jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/JsfAutoreloadExtension.java`
   - Action: Create class with properties (use Gradle `Property<T>` / `ListProperty<T>` for configuration cache compatibility): `Property<Integer> port` (default 35729), `Property<String> serverName` (default `"defaultServer"`), `Property<String> outputDir` (default `""` = auto-infer), `ListProperty<String> watchDirs` (default `["src/main/webapp"]`).
 
-- [ ] **Task 7: FileChangeWatcher**
+- [x] **Task 7: FileChangeWatcher**
   - File: `jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/watcher/FileChangeWatcher.java`
   - Action: Create class wrapping `io.methvin.watcher.DirectoryWatcher`. Constructor takes `List<Path> watchDirs` and two callbacks: `Consumer<Path> onChanged` (for CREATE/MODIFY) and `Consumer<Path> onDeleted` (for DELETE). `start()` creates and starts the watcher in a daemon thread: `DirectoryWatcher.builder().paths(watchDirs).listener(event -> { if (event.eventType() == CREATE || event.eventType() == MODIFY) { onChanged.accept(event.path()); } else if (event.eventType() == DELETE) { onDeleted.accept(event.path()); } }).build()`. `stop()` closes the watcher.
   - Notes: Import `io.methvin.watcher.DirectoryChangeEvent.EventType.*`. Catch and log `IOException` from watcher startup — do not crash the task.
 
-- [ ] **Task 8: DevWebSocketServer**
+- [x] **Task 8: DevWebSocketServer**
   - File: `jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/websocket/DevWebSocketServer.java`
   - Action: Create class extending `org.java_websocket.server.WebSocketServer` (pre-relocation import name — Shadow rewrites this to `it.bstz.shaded.java_websocket` at build time). Override `onOpen`, `onClose`, `onMessage`, `onError` (no-ops are fine). Expose `void broadcastReload()` calling `super.broadcast("reload")`. Constructor takes `int port` and calls `super(new InetSocketAddress(port))`.
   - Notes: ALWAYS import `org.java_websocket.*` in source — NEVER the relocated name. The Shadow plugin handles bytecode relocation at build time. Port conflict check: wrap `super.start()` in try-catch; if `BindException` is thrown, rethrow as `IllegalStateException("JSF Autoreload: port " + port + " is already in use. Configure a different port via jsfAutoreload { port = XXXX }")`.
 
-- [ ] **Task 9: LibertyServerAdapter**
+- [x] **Task 9: LibertyServerAdapter**
   - File: `jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/server/liberty/LibertyServerAdapter.java`
   - Action: Implement `ServerAdapter`. Fields: `int httpPort`, `String contextRoot`. Constructor takes both. `isRunning()`: open `HttpURLConnection` to `http://localhost:{httpPort}/`, set `connectTimeout(500)` and `readTimeout(500)`, return `true` if response code `< 500`. Catch `java.net.ConnectException` and return `false` (server not yet accepting connections). Catch `IOException` generically and return `false`. `getHttpPort()`: return `httpPort`. `getContextRoot()`: return `contextRoot`.
   - Notes: Use `java.net.HttpURLConnection` — no extra HTTP client dependency. Catching `ConnectException` before `IOException` is critical: a refused connection throws `ConnectException`, not a response code.
 
-- [ ] **Task 10: DevModeFilter — runtime module**
+- [x] **Task 10: DevModeFilter — runtime module**
   - File: `jsf-autoreload-runtime/src/main/java/io/github/tizianobasile/jsfautoreload/filter/DevModeFilter.java`
   - Action: Implement `javax.servlet.Filter`. In `init(FilterConfig)`: read port via `System.getProperty("jsf.autoreload.port", "35729")`. Build inline script string: `"<script>(function(){var ws=new WebSocket('ws://localhost:" + port + "');ws.onmessage=function(e){if(e.data==='reload')window.location.reload();};ws.onclose=function(){setTimeout(function(){location.reload();},2000);};}());</script>"`. In `doFilter`: if response is already committed, call `chain.doFilter()` and return immediately. Otherwise, wrap `HttpServletResponse` with a `CharArrayWriter`-backed `HttpServletResponseWrapper` that overrides `getWriter()`. Call `chain.doFilter(request, wrappedResponse)`. After chain completes: check if `Content-Type` contains `text/html`; if yes, append the inline script string to the `CharArrayWriter` buffer, call `response.setContentLength(-1)` to reset Content-Length (prevents browser truncation), then write the full buffer to `response.getWriter()`. If `Content-Type` does not contain `text/html`, write the buffer unmodified.
   - Notes: `setContentLength(-1)` removes the `Content-Length` header so the browser does not truncate the response at the original length. This is required whenever content is appended after the chain writes.
 
-- [ ] **Task 11: web-fragment.xml — runtime module**
+- [x] **Task 11: web-fragment.xml — runtime module**
   - File: `jsf-autoreload-runtime/src/main/resources/META-INF/web-fragment.xml`
   - Action: Create Servlet 3.0 web fragment. Declare `DevModeFilter` with `<filter-class>it.bstz.jsfautoreload.filter.DevModeFilter</filter-class>`. Map to `*.xhtml` with `<dispatcher>REQUEST</dispatcher>` and `<dispatcher>FORWARD</dispatcher>`. Do NOT include an `<ordering>` element — fragment ordering controls metadata load order, not filter chain execution order, and is not needed here.
   - Notes: The filter buffers the complete response and appends after chain completes. Its position in the filter chain does not affect correctness, so no explicit ordering is required.
 
-- [ ] **Task 12: JsfPrepareTask — pre-start preparation**
+- [x] **Task 12: JsfPrepareTask — pre-start preparation**
   - File: `jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/JsfPrepareTask.java`
   - Action: Create class extending `DefaultTask`. Add `@InputFiles FileCollection runtimeJarFiles` (wired by plugin). Add `@Input` fields for `serverName`, `port`, `outputDir` (wired from extension). `@TaskAction void prepare()`:
     1. Resolve `outputDir`: if empty, infer as `${project.rootDir}/build/wlp/usr/servers/${serverName}/apps/expanded/${project.name}.war`. **Validate**: if the resolved path does not exist, throw `GradleException("[JSF Autoreload] Output directory not found: ${outputDir}. Configure it explicitly via jsfAutoreload { outputDir = '...' } or verify your Liberty server name matches jsfAutoreload { serverName = '...' }")`.
@@ -216,7 +216,7 @@ jsfPrepare → libertyStart → jsfDev
     5. Check `server.xml` for `parentFirst`: read `${project.rootDir}/src/main/liberty/config/server.xml` (standard Liberty Gradle plugin path); if it contains `delegation="parentFirst"`, print: `[JSF Autoreload] WARNING: Liberty classloader delegation is set to 'parentFirst'. DevModeFilter may not register correctly. Switch to 'parentLast' (the default).`
   - Notes: Steps 3 and 4 deduplicate on every run — safe to call repeatedly.
 
-- [ ] **Task 13: JsfDevTask — dev loop**
+- [x] **Task 13: JsfDevTask — dev loop**
   - File: `jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/JsfDevTask.java`
   - Action: Create class extending `DefaultTask`. Annotate with `@UntrackedTask(because = "Dev server runs indefinitely")`. Add `@Input` fields for `port`, `outputDir`, `watchDirs` (wired from extension). `@TaskAction void execute()`:
     1. Start `DevWebSocketServer` on configured `port` — fail fast on `IllegalStateException` from port conflict.
@@ -227,7 +227,7 @@ jsfPrepare → libertyStart → jsfDev
     4. Print: `[JSF Autoreload] Dev server started on ws://localhost:${port}. Watching: ${watchDirs}`.
     5. Call `latch.await()`.
 
-- [ ] **Task 14: JsfAutoreloadPlugin — plugin entry point**
+- [x] **Task 14: JsfAutoreloadPlugin — plugin entry point**
   - File: `jsf-autoreload-plugin/src/main/java/io/github/tizianobasile/jsfautoreload/JsfAutoreloadPlugin.java`
   - Action: Implement `Plugin<Project>`. In `apply(Project project)`:
     1. Register extension: `project.getExtensions().create("jsfAutoreload", JsfAutoreloadExtension.class)`.
@@ -236,23 +236,23 @@ jsfPrepare → libertyStart → jsfDev
     4. In `project.afterEvaluate`: if `libertyStart` task exists, wire `libertyStart.dependsOn("jsfPrepare")` and `jsfDev.dependsOn("libertyStart")`; else log warning: `"[JSF Autoreload] 'libertyStart' task not found. Make sure io.openliberty.tools.liberty plugin is applied."`.
   - Notes: `afterEvaluate` is required because `libertyStart` is registered by `liberty-gradle-plugin` which may be applied after our plugin.
 
-- [ ] **Task 15: Unit tests — FileChangeWatcher**
+- [x] **Task 15: Unit tests — FileChangeWatcher**
   - File: `jsf-autoreload-plugin/src/test/java/io/github/tizianobasile/jsfautoreload/watcher/FileChangeWatcherTest.java`
   - Action: Use JUnit 5 + `@TempDir`. Tests: (1) CREATE event — write new file, assert `onChanged` called with correct path within 2s via `CountDownLatch`; (2) MODIFY event — write existing file, assert `onChanged` called; (3) DELETE event — delete file, assert `onDeleted` called and `onChanged` NOT called.
 
-- [ ] **Task 16: Unit tests — DevModeFilter**
+- [x] **Task 16: Unit tests — DevModeFilter**
   - File: `jsf-autoreload-runtime/src/test/java/io/github/tizianobasile/jsfautoreload/filter/DevModeFilterTest.java`
   - Action: Use JUnit 5 + Mockito. Tests: (1) `text/html` response gets reload script appended to body; (2) `Content-Length` is reset to `-1` when script is appended; (3) `application/json` response is NOT modified; (4) already-committed response is NOT modified — `chain.doFilter()` is called but buffer is not written twice; (5) port read from JVM system property `jsf.autoreload.port` at filter init (set via `System.setProperty` in test setup).
 
-- [ ] **Task 17: Unit tests — DevWebSocketServer**
+- [x] **Task 17: Unit tests — DevWebSocketServer**
   - File: `jsf-autoreload-plugin/src/test/java/io/github/tizianobasile/jsfautoreload/websocket/DevWebSocketServerTest.java`
   - Action: Use JUnit 5. Start server on a random free port (use `ServerSocket(0)` to find one, close it, then bind WS server to same port). Connect a test WS client (`org.java_websocket.client.WebSocketClient`). Call `broadcastReload()`, assert client receives `"reload"` message within 1s via `CountDownLatch`. Test cleanup: call `wsServer.stop()` in `@AfterEach`.
 
-- [ ] **Task 18: Unit tests — LibertyServerAdapter**
+- [x] **Task 18: Unit tests — LibertyServerAdapter**
   - File: `jsf-autoreload-plugin/src/test/java/io/github/tizianobasile/jsfautoreload/server/liberty/LibertyServerAdapterTest.java`
   - Action: Use JUnit 5 + a `MockWebServer` (e.g. `com.squareup.okhttp3:mockwebserver`) or a simple `com.sun.net.httpserver.HttpServer`. Tests: (1) `isRunning()` returns `true` when server returns 200; (2) `isRunning()` returns `true` when server returns 404 (server up but resource missing); (3) `isRunning()` returns `false` when nothing is listening on port (connection refused — `ConnectException`); (4) `getHttpPort()` returns configured value; (5) `getContextRoot()` returns configured value.
 
-- [ ] **Task 19: Integration tests — Gradle TestKit**
+- [x] **Task 19: Integration tests — Gradle TestKit**
   - File: `jsf-autoreload-plugin/src/test/java/io/github/tizianobasile/jsfautoreload/JsfAutoreloadPluginIntegrationTest.java`
   - Action: Use `GradleRunner`. Tests: (1) Apply plugin to minimal project → verify `jsfDev` and `jsfPrepare` tasks are registered; (2) Apply plugin + liberty plugin → verify `jsfDev` depends on `libertyStart` and `libertyStart` depends on `jsfPrepare`; (3) Configure `jsfAutoreload { port = 35730 }` → verify `port` extension property resolves to `35730`.
 
@@ -342,3 +342,15 @@ jsfPrepare → libertyStart → jsfDev
 - v2 backlog: Maven plugin, Java class reloading (custom ClassLoader — document state loss for session-scoped beans), attach mode, Tomcat/WildFly/JBoss/GlassFish support, Jakarta EE 9+ (`jakarta.servlet`) support
 - `ServerAdapter` interface must remain minimal so adding v2 server support requires only a new implementation class, no changes to core logic
 - Both Mojarra and MyFaces supported from v1 via `bootstrap.properties` entries
+
+## Review Notes
+
+- Adversarial review completed
+- Findings: 28 total, 24 fixed, 4 skipped (by-design or deferred)
+- Resolution approach: auto-fix
+
+### Skipped findings
+- F11 (latch.await blocks daemon): By design per tech spec — task runs until Ctrl+C
+- F18 (server.xml path inconsistency): Correct per Liberty Gradle plugin conventions
+- F24 (no JsfPrepareTask tests): Deferred — would require substantial test infrastructure
+- F25 (ServerAdapter unused): By design per tech spec — v2 extension point
