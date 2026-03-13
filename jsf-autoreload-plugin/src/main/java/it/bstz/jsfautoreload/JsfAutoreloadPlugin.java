@@ -4,9 +4,12 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Provider;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class JsfAutoreloadPlugin implements Plugin<Project> {
 
@@ -42,6 +45,45 @@ public class JsfAutoreloadPlugin implements Plugin<Project> {
             task.getPort().set(extension.getPort());
             task.getOutputDir().set(resolvedOutputDir);
             task.getWatchDirs().set(extension.getWatchDirs());
+            task.getWatchClasses().set(extension.getWatchClasses());
+
+            // Wire Java compilation properties from the project model
+            task.getSourceDirs().set(project.provider(() -> {
+                try {
+                    JavaPluginExtension java = project.getExtensions()
+                            .getByType(JavaPluginExtension.class);
+                    return java.getSourceSets().getByName("main").getJava()
+                            .getSrcDirs().stream()
+                            .map(File::getAbsolutePath)
+                            .collect(Collectors.toList());
+                } catch (Exception e) {
+                    return Collections.singletonList(
+                            new File(project.getProjectDir(), "src/main/java").getAbsolutePath());
+                }
+            }));
+
+            task.getClassesOutputDir().set(project.provider(() ->
+                    new File(project.getBuildDir(), "classes/java/main").getAbsolutePath()));
+
+            task.getCompileClasspath().set(project.provider(() -> {
+                try {
+                    Configuration compileClasspath = project.getConfigurations()
+                            .getByName("compileClasspath");
+                    return compileClasspath.getAsPath();
+                } catch (Exception e) {
+                    return "";
+                }
+            }));
+
+            task.getSourceCompatibility().set(project.provider(() -> {
+                try {
+                    JavaPluginExtension java = project.getExtensions()
+                            .getByType(JavaPluginExtension.class);
+                    return java.getSourceCompatibility().toString();
+                } catch (Exception e) {
+                    return "11";
+                }
+            }));
         });
 
         project.afterEvaluate(p -> {

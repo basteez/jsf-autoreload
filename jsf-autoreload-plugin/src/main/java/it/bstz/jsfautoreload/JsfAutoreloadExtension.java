@@ -13,6 +13,7 @@ public class JsfAutoreloadExtension {
     private final Property<String> serverName;
     private final Property<String> outputDir;
     private final ListProperty<String> watchDirs;
+    private final Property<Boolean> watchClasses;
 
     @Inject
     public JsfAutoreloadExtension(ObjectFactory objects) {
@@ -20,6 +21,7 @@ public class JsfAutoreloadExtension {
         this.serverName = objects.property(String.class).convention("defaultServer");
         this.outputDir = objects.property(String.class).convention("");
         this.watchDirs = objects.listProperty(String.class).convention(Collections.singletonList("src/main/webapp"));
+        this.watchClasses = objects.property(Boolean.class).convention(true);
     }
 
     public Property<Integer> getPort() {
@@ -36,5 +38,9 @@ public class JsfAutoreloadExtension {
 
     public ListProperty<String> getWatchDirs() {
         return watchDirs;
+    }
+
+    public Property<Boolean> getWatchClasses() {
+        return watchClasses;
     }
 }

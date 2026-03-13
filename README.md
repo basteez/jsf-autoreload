@@ -1,13 +1,21 @@
 # JSF Autoreload
 
-A Gradle plugin that adds live-reload to JSF applications running on IBM Liberty. Edit your `.xhtml` templates or CSS and see changes instantly in the browser — no manual rebuild or refresh needed.
+A Gradle plugin that adds live-reload to JSF applications running on IBM Liberty. Edit `.xhtml` templates, CSS, JS, or Java classes and see changes instantly in the browser — no manual rebuild or refresh needed.
 
 ## How it works
 
-1. **`jsfPrepare`** — configures Liberty for dev mode: disables Facelets template caching, injects a tiny servlet filter into the exploded WAR that adds a reload script to every `.xhtml` response, and sets the WebSocket port in `jvm.options`.
-2. **`jsfDev`** — starts a WebSocket server and watches your source directories. When a file changes, it's copied to the exploded WAR directory and a reload signal is broadcast to all connected browsers.
+1. **`jsfPrepare`** — configures Liberty for dev mode: disables Facelets template caching via `<context-param>` injection into `web.xml`, injects a tiny servlet filter into the exploded WAR that adds a reload script to every `.xhtml` response, and sets the WebSocket port in `jvm.options`.
+2. **`jsfDev`** — starts a WebSocket server and watches your source directories. When a webapp file changes (`.xhtml`, CSS, JS), it's copied to the exploded WAR and a reload signal is broadcast. When a Java source file changes, it's automatically recompiled with `javac`, the compiled classes are synced to `WEB-INF/classes`, Liberty detects the update and restarts the app, and the browser reloads.
 
 The injected script connects to the WebSocket server and calls `window.location.reload()` when it receives a reload message. It includes reconnect logic with exponential backoff.
+
+### What gets live-reloaded
+
+| Resource type | How it works |
+|---|---|
+| `.xhtml` templates | Copied to exploded WAR, Facelets cache disabled — instant |
+| CSS/JS (static or JSF resources) | Copied to exploded WAR, browser reloads |
+| Java classes | Recompiled with `javac`, synced to `WEB-INF/classes`, Liberty restarts app (~1-2s) |
 
 ## Requirements
 
@@ -89,9 +97,9 @@ This will:
 - Create the Liberty server and install features
 - Inject the runtime filter and configure facelets refresh
 - Start Liberty
-- Start the file watcher and WebSocket server
+- Start file watchers (webapp resources + Java sources) and WebSocket server
 
-Edit any file in `src/main/webapp` and the browser will reload automatically.
+Edit any file in `src/main/webapp` or `src/main/java` and the browser will reload automatically.
 
 Press `Ctrl+C` to stop — this shuts down both the dev server and Liberty.
 
@@ -102,7 +110,8 @@ jsfAutoreload {
     port = 35729                        // WebSocket server port
     serverName = 'defaultServer'        // Liberty server name
     outputDir = ''                      // auto-resolved from serverName; set explicitly to override
-    watchDirs = ['src/main/webapp']     // directories to watch for changes
+    watchDirs = ['src/main/webapp']     // directories to watch for webapp resource changes
+    watchClasses = true                 // watch Java sources, recompile, and sync classes
 }
 ```
 
@@ -117,6 +126,7 @@ jsf-autoreload/
 │           ├── JsfAutoreloadExtension.java
 │           ├── JsfPrepareTask.java
 │           ├── JsfDevTask.java
+│           ├── compiler/JavaSourceCompiler.java
 │           ├── watcher/FileChangeWatcher.java
 │           ├── websocket/DevWebSocketServer.java
 │           └── server/
