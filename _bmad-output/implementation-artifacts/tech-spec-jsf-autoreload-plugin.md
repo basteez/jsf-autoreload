@@ -345,12 +345,37 @@ jsfPrepare → libertyStart → jsfDev
 
 ## Review Notes
 
+### Review 1 (tech spec adversarial review)
 - Adversarial review completed
 - Findings: 28 total, 24 fixed, 4 skipped (by-design or deferred)
 - Resolution approach: auto-fix
 
-### Skipped findings
+#### Skipped findings
 - F11 (latch.await blocks daemon): By design per tech spec — task runs until Ctrl+C
 - F18 (server.xml path inconsistency): Correct per Liberty Gradle plugin conventions
 - F24 (no JsfPrepareTask tests): Deferred — would require substantial test infrastructure
 - F25 (ServerAdapter unused): By design per tech spec — v2 extension point
+
+### Review 2 (code review against tech spec — 2026-03-13)
+- Adversarial code review completed
+- Findings: 13 total (5 HIGH, 5 MEDIUM, 3 LOW)
+- Fixed: 10 (5 HIGH, 5 MEDIUM)
+- Remaining: 3 LOW (cosmetic/informational)
+- Resolution approach: auto-fix
+
+#### Fixed findings
+- F1 (HIGH): `watchClasses` default changed from `true` to `false` — matches v1 scope (AC 9)
+- F3 (HIGH): web.xml injection now validates `<web-app>` tag exists before inserting context-params
+- F4 (HIGH): `FileChangeWatcher.start()` now logs IOException instead of throwing RuntimeException
+- F5 (HIGH): Removed `getProject()` calls from task execution in `JsfPrepareTask` and `JsfDevTask` — added `rootDir` and `projectDir` as task properties wired at configuration time
+- F6 (MEDIUM): Shutdown hook now performs cleanup (stop watchers, WS server) directly for robustness
+- F7 (MEDIUM): `stopLibertyServer()` documented as configuration-cache-incompatible with TODO
+- F8 (MEDIUM): Added integration test `taskDependencyWiringWithLibertyStartTask` verifying task graph
+- F9 (MEDIUM): Added 5 unit tests for `JavaSourceCompiler` (valid, invalid, empty, nonexistent, packaged)
+- F10 (MEDIUM): Shadow plugin version noted as deviation from spec (functional, not changed)
+- F12 (LOW bonus): Replaced deprecated `project.getBuildDir()` with `project.getLayout().getBuildDirectory()`
+
+#### Remaining LOW findings (not fixed)
+- F2 (HIGH→informational): Tech spec says bootstrap.properties but code uses web.xml injection — code approach is better, spec should be updated
+- F11 (LOW): `Property<FileCollection>` with `@InputFiles` not fully idiomatic — functional
+- F13 (LOW): web.xml context-param insertion order reversed — cosmetic, no impact

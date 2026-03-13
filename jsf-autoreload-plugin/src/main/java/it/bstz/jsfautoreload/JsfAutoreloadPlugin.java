@@ -37,6 +37,7 @@ public class JsfAutoreloadPlugin implements Plugin<Project> {
             task.getServerName().set(extension.getServerName());
             task.getPort().set(extension.getPort());
             task.getOutputDir().set(resolvedOutputDir);
+            task.getRootDir().set(project.getRootDir().getAbsolutePath());
         });
 
         project.getTasks().register("jsfDev", JsfDevTask.class, task -> {
@@ -46,6 +47,7 @@ public class JsfAutoreloadPlugin implements Plugin<Project> {
             task.getOutputDir().set(resolvedOutputDir);
             task.getWatchDirs().set(extension.getWatchDirs());
             task.getWatchClasses().set(extension.getWatchClasses());
+            task.getProjectDir().set(project.getProjectDir().getAbsolutePath());
 
             // Wire Java compilation properties from the project model
             task.getSourceDirs().set(project.provider(() -> {
@@ -62,8 +64,9 @@ public class JsfAutoreloadPlugin implements Plugin<Project> {
                 }
             }));
 
-            task.getClassesOutputDir().set(project.provider(() ->
-                    new File(project.getBuildDir(), "classes/java/main").getAbsolutePath()));
+            task.getClassesOutputDir().set(
+                    project.getLayout().getBuildDirectory().dir("classes/java/main")
+                            .map(d -> d.getAsFile().getAbsolutePath()));
 
             task.getCompileClasspath().set(project.provider(() -> {
                 try {

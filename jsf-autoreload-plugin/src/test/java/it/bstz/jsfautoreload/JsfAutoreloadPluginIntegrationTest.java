@@ -42,6 +42,36 @@ class JsfAutoreloadPluginIntegrationTest {
     }
 
     @Test
+    void taskDependencyWiringWithLibertyStartTask() throws IOException {
+        Files.writeString(testProjectDir.resolve("build.gradle"),
+                "plugins {\n" +
+                "    id 'it.bstz.jsf-autoreload'\n" +
+                "}\n" +
+                "// Simulate liberty plugin by registering libertyStart task\n" +
+                "tasks.register('libertyStart') {\n" +
+                "    group = 'Liberty'\n" +
+                "}\n" +
+                "tasks.register('printDeps') {\n" +
+                "    doLast {\n" +
+                "        def jsfDev = tasks.named('jsfDev').get()\n" +
+                "        def libertyStart = tasks.named('libertyStart').get()\n" +
+                "        println 'JSFDEV_DEPS=' + jsfDev.dependsOn\n" +
+                "        println 'LIBERTY_DEPS=' + libertyStart.dependsOn\n" +
+                "    }\n" +
+                "}\n");
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir.toFile())
+                .withArguments("printDeps")
+                .withPluginClasspath()
+                .build();
+
+        String output = result.getOutput();
+        assertTrue(output.contains("libertyStart"), "jsfDev should depend on libertyStart");
+        assertTrue(output.contains("jsfPrepare"), "libertyStart should depend on jsfPrepare");
+    }
+
+    @Test
     void extensionPortPropertyResolves() throws IOException {
         Files.writeString(testProjectDir.resolve("build.gradle"),
                 "plugins {\n" +

@@ -39,7 +39,7 @@ public class FileChangeWatcher {
                     .build();
             watcher.watchAsync();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to start file watcher", e);
+            LOGGER.log(Level.SEVERE, "Failed to start file watcher for dirs: " + watchDirs, e);
         }
     }
 

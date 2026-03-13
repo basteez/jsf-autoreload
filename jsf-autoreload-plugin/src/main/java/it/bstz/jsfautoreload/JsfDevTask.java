@@ -45,6 +45,9 @@ public abstract class JsfDevTask extends DefaultTask {
     public abstract Property<Boolean> getWatchClasses();
 
     @Internal
+    public abstract Property<String> getProjectDir();
+
+    @Internal
     public abstract Property<String> getCompileClasspath();
 
     @Internal
@@ -60,13 +63,14 @@ public abstract class JsfDevTask extends DefaultTask {
     public void execute() throws InterruptedException {
         int port = getPort().get();
         Path outputDir = Paths.get(getOutputDir().get());
+        Path projectDir = Paths.get(getProjectDir().get());
 
         DevWebSocketServer wsServer = new DevWebSocketServer(port);
         wsServer.startServer();
 
         // Webapp file watcher
         List<Path> watchPaths = getWatchDirs().get().stream()
-                .map(dir -> getProject().getProjectDir().toPath().resolve(dir))
+                .map(dir -> projectDir.resolve(dir))
                 .collect(Collectors.toList());
 
         FileChangeWatcher webappWatcher = createWebappWatcher(watchPaths, outputDir, wsServer);
@@ -85,7 +89,7 @@ public abstract class JsfDevTask extends DefaultTask {
 
         if (classWatchEnabled) {
             List<Path> sourcePaths = getSourceDirs().get().stream()
-                    .map(d -> getProject().getProjectDir().toPath().resolve(d))
+                    .map(Paths::get)
                     .filter(Files::isDirectory)
                     .collect(Collectors.toList());
 
@@ -103,12 +107,25 @@ public abstract class JsfDevTask extends DefaultTask {
             }
         }
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Thread shutdownHook = new Thread(() -> latch.countDown());
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
-
         getLogger().lifecycle("[JSF Autoreload] Dev server started on ws://localhost:{}. Watching: {}",
                 port, getWatchDirs().get());
+
+        // Shutdown hook performs cleanup directly for robustness during JVM shutdown
+        CountDownLatch latch = new CountDownLatch(1);
+        FileChangeWatcher finalSourceWatcher = sourceWatcher;
+        ScheduledExecutorService finalCompileDebouncer = compileDebouncer;
+        Thread shutdownHook = new Thread(() -> {
+            webappWatcher.stop();
+            if (finalSourceWatcher != null) {
+                finalSourceWatcher.stop();
+            }
+            if (finalCompileDebouncer != null) {
+                finalCompileDebouncer.shutdownNow();
+            }
+            wsServer.stopServer();
+            latch.countDown();
+        });
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
 
         try {
             latch.await();
@@ -116,6 +133,7 @@ public abstract class JsfDevTask extends DefaultTask {
             Thread.currentThread().interrupt();
         } finally {
             getLogger().lifecycle("[JSF Autoreload] Shutting down...");
+            // Idempotent cleanup — may already be done by shutdown hook
             webappWatcher.stop();
             if (sourceWatcher != null) {
                 sourceWatcher.stop();
@@ -209,7 +227,7 @@ public abstract class JsfDevTask extends DefaultTask {
     private void compileAndSync(Path outputDir, DevWebSocketServer wsServer) {
         try {
             List<Path> sourcePaths = getSourceDirs().get().stream()
-                    .map(d -> getProject().getProjectDir().toPath().resolve(d))
+                    .map(Paths::get)
                     .collect(Collectors.toList());
             Path classesDir = Paths.get(getClassesOutputDir().get());
 
@@ -258,6 +276,9 @@ public abstract class JsfDevTask extends DefaultTask {
     }
 
     private void stopLibertyServer() {
+        // TODO: This uses getProject() at execution time, which is incompatible with
+        // Gradle configuration cache. Acceptable for @UntrackedTask dev server but
+        // should be refactored if configuration cache support is required.
         Task libertyStop = getProject().getTasks().findByName("libertyStop");
         if (libertyStop != null) {
             try {
