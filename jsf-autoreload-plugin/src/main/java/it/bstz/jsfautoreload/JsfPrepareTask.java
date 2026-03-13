@@ -31,13 +31,16 @@ public abstract class JsfPrepareTask extends DefaultTask {
     @Input
     public abstract Property<String> getOutputDir();
 
+    @Input
+    public abstract Property<String> getRootDir();
+
     @TaskAction
     public void prepare() throws IOException {
         String serverName = getServerName().get();
         int port = getPort().get();
         String outputDirPath = getOutputDir().get();
 
-        File rootDir = getProject().getRootDir();
+        File rootDir = new File(getRootDir().get());
 
         File outputDir = new File(outputDirPath);
         if (!outputDir.exists()) {
@@ -105,7 +108,12 @@ public abstract class JsfPrepareTask extends DefaultTask {
                         + "        <param-value>" + param[1] + "</param-value>\n"
                         + "    </context-param>";
                 // Insert after <web-app ...> opening tag
-                int insertPos = content.indexOf(">", content.indexOf("<web-app"));
+                int webAppIdx = content.indexOf("<web-app");
+                if (webAppIdx < 0) {
+                    getLogger().warn("[JSF Autoreload] <web-app> tag not found in web.xml. Cannot inject context-param: {}", param[0]);
+                    continue;
+                }
+                int insertPos = content.indexOf(">", webAppIdx);
                 if (insertPos >= 0) {
                     content = content.substring(0, insertPos + 1) + contextParam + content.substring(insertPos + 1);
                     modified = true;

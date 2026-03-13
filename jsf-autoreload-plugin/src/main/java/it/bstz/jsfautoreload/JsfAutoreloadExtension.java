@@ -21,7 +21,7 @@ public class JsfAutoreloadExtension {
         this.serverName = objects.property(String.class).convention("defaultServer");
         this.outputDir = objects.property(String.class).convention("");
         this.watchDirs = objects.listProperty(String.class).convention(Collections.singletonList("src/main/webapp"));
-        this.watchClasses = objects.property(Boolean.class).convention(true);
+        this.watchClasses = objects.property(Boolean.class).convention(false);
     }
 
     public Property<Integer> getPort() {
