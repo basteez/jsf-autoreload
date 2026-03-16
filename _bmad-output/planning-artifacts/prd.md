@@ -352,8 +352,8 @@ Extract shared core module, add Maven plugin and Tomcat adapter. Validates the r
 ### Performance
 
 - **NFR1:** End-to-end feedback loop (file save → browser refresh) completes in under 2 seconds for a single file change event (create, modify, or delete) on a file under 1MB
-- **NFR2:** File system event detection and file copy completes in under 500ms
-- **NFR3:** WebSocket broadcast delivery to connected browsers completes in under 100ms
+- **NFR2:** File system event detection and file copy completes in under 500ms as measured by unit test wall-clock timing from event callback to copy completion
+- **NFR3:** WebSocket broadcast delivery to connected browsers completes in under 100ms as measured by unit test round-trip timing from broadcast call to client message receipt
 - **NFR4:** Plugin startup (WebSocket server + file watcher initialization) completes in under 3 seconds
 - **NFR5:** Runtime filter response buffering adds no more than 50ms latency to HTML responses
 - **NFR6:** Plugin coalesces rapid successive file change events within a debounce window (default 300ms) into a single browser reload to prevent reload storms (e.g., IDE "save all", git checkout)
@@ -365,7 +365,7 @@ Extract shared core module, add Maven plugin and Tomcat adapter. Validates the r
 - **NFR9:** Maven plugin works with Maven 3.6+
 - **NFR10:** Runtime filter works in any Servlet 3.0+ container
 - **NFR11:** Runtime filter operates correctly with both Mojarra and MyFaces JSF implementations
-- **NFR12:** Plugin does not conflict with other Gradle/Maven plugins in the user's build
+- **NFR12:** Plugin does not conflict with the following common Gradle/Maven plugins in the user's build: `war`, `java`, `liberty-gradle-plugin`, `spring-boot-gradle-plugin`, `maven-war-plugin`, `maven-compiler-plugin`; verified by integration tests applying the plugin alongside each
 - **NFR13:** Runtime JAR has zero transitive dependencies to avoid classpath conflicts in user WARs
 - **NFR14:** Plugin operates correctly on macOS, Linux, and Windows
 
