@@ -16,6 +16,7 @@ repositories {
 val runtimeJar by configurations.creating
 
 dependencies {
+    implementation(project(":jsf-autoreload-core"))
     implementation(gradleApi())
     implementation("io.methvin:directory-watcher:0.18.0")
     implementation("org.java-websocket:Java-WebSocket:1.5.7")
@@ -26,6 +27,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testImplementation("org.java-websocket:Java-WebSocket:1.5.7")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
 }
 
 tasks.test {
