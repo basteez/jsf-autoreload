@@ -1,5 +1,7 @@
 package it.bstz.jsfautoreload;
 
+import it.bstz.jsfautoreload.server.ServerConfigParams;
+import it.bstz.jsfautoreload.server.liberty.LibertyServerAdapter;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.FileCollection;
@@ -8,11 +10,11 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.TaskAction;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,39 +42,47 @@ public abstract class JsfPrepareTask extends DefaultTask {
         int port = getPort().get();
         String outputDirPath = getOutputDir().get();
 
-        File rootDir = new File(getRootDir().get());
+        Path rootDir = Path.of(getRootDir().get());
+        Path outputDir = Path.of(outputDirPath);
 
-        File outputDir = new File(outputDirPath);
-        if (!outputDir.exists()) {
+        if (!Files.isDirectory(outputDir)) {
             throw new GradleException("[JSF Autoreload] Output directory not found: " + outputDirPath
                     + ". Configure it explicitly via jsfAutoreload { outputDir = '...' } or verify your Liberty server name matches jsfAutoreload { serverName = '...' }");
         }
 
-        // Copy runtime JAR to WEB-INF/lib
-        File webInfLib = new File(outputDir, "WEB-INF/lib");
-        webInfLib.mkdirs();
+        // Copy runtime JAR to WEB-INF/lib (Gradle-specific)
+        Path webInfLib = outputDir.resolve("WEB-INF/lib");
+        Files.createDirectories(webInfLib);
         copyRuntimeJar(webInfLib);
 
-        // Inject facelets refresh context-params into web.xml
-        File webXml = new File(outputDir, "WEB-INF/web.xml");
-        injectFaceletsRefreshParams(webXml);
+        // Delegate JSF config writing to the server adapter
+        LibertyServerAdapter adapter = new LibertyServerAdapter(port, "/", serverName, rootDir);
+        ServerConfigParams params = ServerConfigParams.builder()
+                .outputDir(outputDir)
+                .mojarraRefreshPeriod(0)
+                .myfacesRefreshPeriod(0)
+                .port(port)
+                .build();
 
-        // Write to jvm.options (port only)
-        File serverDir = new File(rootDir, "build/wlp/usr/servers/" + serverName);
-        File jvmOptionsFile = new File(serverDir, "jvm.options");
+        try {
+            adapter.writeServerConfig(params);
+            getLogger().lifecycle("[JSF Autoreload] Server configuration written via LibertyServerAdapter");
+        } catch (JsfAutoreloadException e) {
+            throw new GradleException(e.getMessage(), e);
+        }
+
+        // Write port to jvm.options — will be replaced by properties file in WEB-INF/classes (Story 2-2)
+        Path serverDir = rootDir.resolve("build/wlp/usr/servers").resolve(serverName);
+        Path jvmOptionsFile = serverDir.resolve("jvm.options");
         writeJvmOptions(jvmOptionsFile, port);
-
-        // Check server.xml for parentFirst
-        File serverXml = new File(rootDir, "src/main/liberty/config/server.xml");
-        checkParentFirst(serverXml);
     }
 
-    private void copyRuntimeJar(File webInfLib) throws IOException {
-        File targetJar = new File(webInfLib, "jsf-autoreload-runtime.jar");
+    private void copyRuntimeJar(Path webInfLib) throws IOException {
+        Path targetJar = webInfLib.resolve("jsf-autoreload-runtime.jar");
         FileCollection files = getRuntimeJarFiles().get();
 
         if (!files.isEmpty()) {
-            Files.copy(files.getSingleFile().toPath(), targetJar.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(files.getSingleFile().toPath(), targetJar, StandardCopyOption.REPLACE_EXISTING);
         } else {
             // Extract from plugin classpath (bundled in plugin JAR)
             try (InputStream is = getClass().getResourceAsStream("/META-INF/jsf-autoreload/jsf-autoreload-runtime.jar")) {
@@ -80,60 +90,19 @@ public abstract class JsfPrepareTask extends DefaultTask {
                     throw new GradleException("[JSF Autoreload] Runtime JAR not found in runtimeJar configuration or plugin classpath. "
                             + "Ensure the plugin is correctly installed.");
                 }
-                Files.copy(is, targetJar.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(is, targetJar, StandardCopyOption.REPLACE_EXISTING);
             }
         }
         getLogger().lifecycle("[JSF Autoreload] Copied runtime JAR to {}", webInfLib);
     }
 
-    private void injectFaceletsRefreshParams(File webXml) throws IOException {
-        if (!webXml.exists()) {
-            getLogger().warn("[JSF Autoreload] web.xml not found at {}. Cannot inject facelets refresh params.", webXml);
-            return;
-        }
-
-        String content = new String(Files.readAllBytes(webXml.toPath()), StandardCharsets.UTF_8);
-
-        String[][] params = {
-                {"javax.faces.FACELETS_REFRESH_PERIOD", "0"},
-                {"org.apache.myfaces.CONFIG_REFRESH_PERIOD", "0"},
-                {"facelets.REFRESH_PERIOD", "0"}
-        };
-
-        boolean modified = false;
-        for (String[] param : params) {
-            if (!content.contains("<param-name>" + param[0] + "</param-name>")) {
-                String contextParam = "\n    <context-param>\n"
-                        + "        <param-name>" + param[0] + "</param-name>\n"
-                        + "        <param-value>" + param[1] + "</param-value>\n"
-                        + "    </context-param>";
-                // Insert after <web-app ...> opening tag
-                int webAppIdx = content.indexOf("<web-app");
-                if (webAppIdx < 0) {
-                    getLogger().warn("[JSF Autoreload] <web-app> tag not found in web.xml. Cannot inject context-param: {}", param[0]);
-                    continue;
-                }
-                int insertPos = content.indexOf(">", webAppIdx);
-                if (insertPos >= 0) {
-                    content = content.substring(0, insertPos + 1) + contextParam + content.substring(insertPos + 1);
-                    modified = true;
-                }
-            }
-        }
-
-        if (modified) {
-            Files.write(webXml.toPath(), content.getBytes(StandardCharsets.UTF_8));
-            getLogger().lifecycle("[JSF Autoreload] Injected facelets refresh context-params into web.xml");
-        }
-    }
-
-    private void writeJvmOptions(File file, int port) throws IOException {
+    private void writeJvmOptions(Path file, int port) throws IOException {
         String portLine = "-Djsf.autoreload.port=" + port;
         List<String> lines = new ArrayList<>();
         boolean found = false;
 
-        if (file.exists()) {
-            lines = new ArrayList<>(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
+        if (Files.exists(file)) {
+            lines = new ArrayList<>(Files.readAllLines(file, StandardCharsets.UTF_8));
             for (int i = 0; i < lines.size(); i++) {
                 if (lines.get(i).startsWith("-Djsf.autoreload.port=")) {
                     lines.set(i, portLine);
@@ -147,22 +116,8 @@ public abstract class JsfPrepareTask extends DefaultTask {
             lines.add(portLine);
         }
 
-        Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
+        Files.createDirectories(file.getParent());
+        Files.write(file, lines, StandardCharsets.UTF_8);
         getLogger().lifecycle("[JSF Autoreload] Updated jvm.options with port={}", port);
-    }
-
-    private void checkParentFirst(File serverXml) {
-        if (!serverXml.exists()) {
-            return;
-        }
-        try {
-            String content = new String(Files.readAllBytes(serverXml.toPath()), StandardCharsets.UTF_8);
-            if (content.contains("delegation=\"parentFirst\"")) {
-                getLogger().warn("[JSF Autoreload] WARNING: Liberty classloader delegation is set to 'parentFirst'. "
-                        + "DevModeFilter may not register correctly. Switch to 'parentLast' (the default).");
-            }
-        } catch (IOException e) {
-            getLogger().warn("[JSF Autoreload] Could not read server.xml: {}", e.getMessage());
-        }
     }
 }

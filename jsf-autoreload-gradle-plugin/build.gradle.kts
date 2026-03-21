@@ -18,14 +18,11 @@ val runtimeJar by configurations.creating
 dependencies {
     implementation(project(":jsf-autoreload-core"))
     implementation(gradleApi())
-    implementation("io.methvin:directory-watcher:0.18.0")
-    implementation("org.java-websocket:Java-WebSocket:1.5.7")
     compileOnly("io.openliberty.tools:liberty-gradle-plugin:3.9.0")
 
     runtimeJar(project(":jsf-autoreload-runtime"))
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
-    testImplementation("org.java-websocket:Java-WebSocket:1.5.7")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
 

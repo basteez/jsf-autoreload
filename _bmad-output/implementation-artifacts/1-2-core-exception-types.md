@@ -1,6 +1,6 @@
 # Story 1.2: Core Exception Types
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -17,21 +17,21 @@ So that error messages are actionable and tell me exactly what to fix.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create `JsfAutoreloadException` (AC: #1, #3, #4)
-  - [ ] 1.1 Create `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/JsfAutoreloadException.java`
-  - [ ] 1.2 Extend `RuntimeException`
-  - [ ] 1.3 Provide constructors: `(String message)` and `(String message, Throwable cause)`
-  - [ ] 1.4 Message format: `"[JSF Autoreload] {what}. {fix}."`
-- [ ] Task 2: Create `JsfAutoreloadConfigException` (AC: #2, #3, #4)
-  - [ ] 2.1 Create `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/JsfAutoreloadConfigException.java`
-  - [ ] 2.2 Extend `JsfAutoreloadException`
-  - [ ] 2.3 Provide constructors: `(String message)` and `(String message, Throwable cause)`
-- [ ] Task 3: Write unit tests (AC: #1, #2, #3)
-  - [ ] 3.1 Create `jsf-autoreload-core/src/test/java/it/bstz/jsfautoreload/JsfAutoreloadExceptionTest.java`
-  - [ ] 3.2 Test message format includes `[JSF Autoreload]` prefix
-  - [ ] 3.3 Test cause preservation via `getCause()`
-  - [ ] 3.4 Test `JsfAutoreloadConfigException` is a subtype of `JsfAutoreloadException`
-  - [ ] 3.5 Test `JsfAutoreloadException` is a subtype of `RuntimeException`
+- [x] Task 1: Create `JsfAutoreloadException` (AC: #1, #3, #4)
+  - [x] 1.1 Create `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/JsfAutoreloadException.java`
+  - [x] 1.2 Extend `RuntimeException`
+  - [x] 1.3 Provide constructors: `(String message)` and `(String message, Throwable cause)`
+  - [x] 1.4 Message format: `"[JSF Autoreload] {what}. {fix}."`
+- [x] Task 2: Create `JsfAutoreloadConfigException` (AC: #2, #3, #4)
+  - [x] 2.1 Create `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/JsfAutoreloadConfigException.java`
+  - [x] 2.2 Extend `JsfAutoreloadException`
+  - [x] 2.3 Provide constructors: `(String message)` and `(String message, Throwable cause)`
+- [x] Task 3: Write unit tests (AC: #1, #2, #3)
+  - [x] 3.1 Create `jsf-autoreload-core/src/test/java/it/bstz/jsfautoreload/JsfAutoreloadExceptionTest.java`
+  - [x] 3.2 Test message format includes `[JSF Autoreload]` prefix
+  - [x] 3.3 Test cause preservation via `getCause()`
+  - [x] 3.4 Test `JsfAutoreloadConfigException` is a subtype of `JsfAutoreloadException`
+  - [x] 3.5 Test `JsfAutoreloadException` is a subtype of `RuntimeException`
 
 ## Dev Notes
 
@@ -72,8 +72,34 @@ Two small classes with standard constructors. The message format convention is t
 
 ### Agent Model Used
 
+Claude Opus 4.6 (1M context)
+
 ### Debug Log References
+
+No issues encountered.
 
 ### Completion Notes List
 
+- Created `JsfAutoreloadException` extending `RuntimeException` with two constructors (message-only and message+cause). Establishes the `[JSF Autoreload]` message prefix convention.
+- Created `JsfAutoreloadConfigException` extending `JsfAutoreloadException` for configuration/validation errors, same constructor pattern.
+- Both classes reside in `it.bstz.jsfautoreload` package with zero external imports (AC #4 satisfied).
+- Wrote 9 unit tests covering: message prefix verification, cause preservation, null cause when not provided, subtype hierarchy (ConfigException -> JsfAutoreloadException -> RuntimeException), and catchability.
+- All tests pass. Full project build successful with no regressions.
+
 ### File List
+
+- New: `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/JsfAutoreloadException.java`
+- New: `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/JsfAutoreloadConfigException.java`
+- New: `jsf-autoreload-core/src/test/java/it/bstz/jsfautoreload/JsfAutoreloadExceptionTest.java`
+
+## Code Review (AI)
+
+- **Reviewer:** Claude Opus 4.6 (1M context)
+- **Date:** 2026-03-21
+- **Result:** Pass — no issues found
+- Clean implementation. No issues found. All ACs verified.
+
+## Change Log
+
+- 2026-03-21: Code review complete — no issues found, status changed to done.
+- 2026-03-16: Story implementation complete — created core exception types with message format convention and comprehensive test coverage.

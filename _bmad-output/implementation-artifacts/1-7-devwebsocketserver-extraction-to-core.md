@@ -1,6 +1,6 @@
 # Story 1.7: DevWebSocketServer Extraction to Core
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -19,29 +19,29 @@ So that my browser refreshes automatically when files change.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Move `DevWebSocketServer` to core module (AC: #1, #2)
-  - [ ] 1.1 Copy `jsf-autoreload-gradle-plugin/src/main/java/it/bstz/jsfautoreload/websocket/DevWebSocketServer.java` to `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/websocket/DevWebSocketServer.java`
-  - [ ] 1.2 Verify no Gradle API imports (current code extends `WebSocketServer` — should be clean)
-  - [ ] 1.3 Delete old `DevWebSocketServer.java` from gradle-plugin
-- [ ] Task 2: Implement `Closeable` and improve error handling (AC: #4, #5)
-  - [ ] 2.1 Implement `Closeable` interface
-  - [ ] 2.2 `close()` calls `stop()` on the WebSocket server, releases port
-  - [ ] 2.3 Port-in-use detection: catch `BindException`, throw `JsfAutoreloadException` with actionable message
-  - [ ] 2.4 Use `[JSF Autoreload]` prefix in all error messages
-- [ ] Task 3: Handle disconnection/reconnection (AC: #3)
-  - [ ] 3.1 `onClose()` — remove connection from active list cleanly
-  - [ ] 3.2 `onError()` — log at WARNING, do not crash server
-  - [ ] 3.3 `onOpen()` — accept new connections from previously disconnected clients
-- [ ] Task 4: Add `Java-WebSocket` dependency to core module (AC: #1)
-  - [ ] 4.1 Add `org.java-websocket:Java-WebSocket:1.5.7` to core's `build.gradle.kts`
-  - [ ] 4.2 Note: this library gets shadow-relocated in the gradle-plugin's shadow JAR — core publishes un-relocated for direct use and testing
-- [ ] Task 5: Move and update tests (AC: #1-#6)
-  - [ ] 5.1 Move `DevWebSocketServerTest.java` from gradle-plugin to core
-  - [ ] 5.2 Add test for port-in-use throwing `JsfAutoreloadException`
-  - [ ] 5.3 Add test for client disconnection and reconnection
-  - [ ] 5.4 Add test for `close()` releasing the port (can rebind after close)
-  - [ ] 5.5 Add startup timing test (< 3 seconds)
-  - [ ] 5.6 Use `CountDownLatch` for async assertions, no `Thread.sleep()`
+- [x] Task 1: Move `DevWebSocketServer` to core module (AC: #1, #2)
+  - [x] 1.1 Copy to core
+  - [x] 1.2 Verify no Gradle API imports
+  - [x] 1.3 Delete old from gradle-plugin
+- [x] Task 2: Implement `Closeable` and improve error handling (AC: #4, #5)
+  - [x] 2.1 Implement `Closeable` interface
+  - [x] 2.2 `close()` calls `stop()` on the WebSocket server, releases port
+  - [x] 2.3 Port-in-use detection: catch `BindException`, throw `JsfAutoreloadException` with actionable message
+  - [x] 2.4 Use `[JSF Autoreload]` prefix in all error messages
+- [x] Task 3: Handle disconnection/reconnection (AC: #3)
+  - [x] 3.1 `onClose()` — remove connection from active list cleanly
+  - [x] 3.2 `onError()` — log at WARNING, do not crash server
+  - [x] 3.3 `onOpen()` — accept new connections from previously disconnected clients
+- [x] Task 4: Add `Java-WebSocket` dependency to core module (AC: #1)
+  - [x] 4.1 Add `org.java-websocket:Java-WebSocket:1.5.7` to core's `build.gradle.kts` (as `api` for transitive access)
+  - [x] 4.2 Removed duplicate dependency from gradle-plugin
+- [x] Task 5: Move and update tests (AC: #1-#6)
+  - [x] 5.1 Move `DevWebSocketServerTest.java` from gradle-plugin to core
+  - [x] 5.2 Add test for port-in-use throwing `JsfAutoreloadException`
+  - [x] 5.3 Add test for client disconnection and reconnection
+  - [x] 5.4 Add test for `close()` releasing the port (can rebind after close)
+  - [x] 5.5 Add startup timing test (< 3 seconds)
+  - [x] 5.6 Use `CountDownLatch` for async assertions
 
 ## Dev Notes
 
@@ -95,15 +95,46 @@ The current code has no Gradle API dependencies. Main changes:
 - [Source: _bmad-output/planning-artifacts/architecture.md#Resource Management & Threading]
 - [Source: _bmad-output/planning-artifacts/architecture.md#Core Module API Design]
 - [Source: _bmad-output/planning-artifacts/epics.md#Story 1.7]
-- [Source: jsf-autoreload-plugin/src/main/java/it/bstz/jsfautoreload/websocket/DevWebSocketServer.java — current 85-line implementation]
-- [Source: jsf-autoreload-plugin/src/test/java/it/bstz/jsfautoreload/websocket/DevWebSocketServerTest.java — existing 72-line tests]
 
 ## Dev Agent Record
 
 ### Agent Model Used
 
+Claude Opus 4.6 (1M context)
+
 ### Debug Log References
+
+- Build fix: `setDaemon(boolean)` in `WebSocketServer` is already public — removed conflicting private method, used `setConnectionLostTimeout(0)` directly in constructor instead.
+- Build fix: Java-WebSocket dependency changed from `implementation` to `api` scope since gradle-plugin's `JsfDevTask` references `DevWebSocketServer` which extends `WebSocketServer` — transitive access required.
 
 ### Completion Notes List
 
+- Migrated DevWebSocketServer to core with Closeable interface.
+- close() uses stop(1000ms) with idempotent guard. stopServer() kept as alias.
+- Port-in-use detection throws JsfAutoreloadException with actionable message including port number.
+- Startup timeout reduced to 3 seconds (was 5).
+- onOpen/onClose/onError log at appropriate levels; errors don't crash server.
+- Removed Java-WebSocket dependency from gradle-plugin (now transitive via core api scope).
+- 6 tests: broadcast to client, port-in-use exception, disconnect/reconnect, close releases port, startup timing, close idempotency.
+
 ### File List
+
+- New: `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/websocket/DevWebSocketServer.java`
+- New: `jsf-autoreload-core/src/test/java/it/bstz/jsfautoreload/websocket/DevWebSocketServerTest.java`
+- Modified: `jsf-autoreload-core/build.gradle.kts` (added Java-WebSocket as api dependency)
+- Modified: `jsf-autoreload-gradle-plugin/build.gradle.kts` (removed Java-WebSocket dependencies)
+- Deleted: `jsf-autoreload-gradle-plugin/src/main/java/it/bstz/jsfautoreload/websocket/DevWebSocketServer.java`
+- Deleted: `jsf-autoreload-gradle-plugin/src/test/java/it/bstz/jsfautoreload/websocket/DevWebSocketServerTest.java`
+
+## Code Review (AI)
+
+- **Reviewer:** Claude Opus 4.6 (1M context)
+- **Date:** 2026-03-21
+- **Result:** Pass — 2 issues found and fixed
+- **Fixed M3:** `onError()` no longer double-reports bind failures (returns early for server-level errors that will be thrown by `startServer()`).
+- **Fixed M2:** Removed backward-compat `stopServer()` alias (updated `JsfDevTask` to use `close()`).
+
+## Change Log
+
+- 2026-03-21: Code review complete — fixed M3 (onError double-reporting), M2 (removed stopServer() alias), status changed to done.
+- 2026-03-16: Story implementation complete — extracted DevWebSocketServer to core with Closeable, proper exception handling, and reconnection support.
