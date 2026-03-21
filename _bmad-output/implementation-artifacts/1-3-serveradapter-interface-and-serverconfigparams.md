@@ -1,6 +1,6 @@
 # Story 1.3: ServerAdapter Interface & ServerConfigParams
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -17,26 +17,26 @@ So that I can implement support for a new application server.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create expanded `ServerAdapter` interface in core (AC: #1, #3, #4)
-  - [ ] 1.1 Create `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/server/ServerAdapter.java`
-  - [ ] 1.2 Declare 5 methods with full Javadoc:
+- [x] Task 1: Create expanded `ServerAdapter` interface in core (AC: #1, #3, #4)
+  - [x] 1.1 Create `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/server/ServerAdapter.java`
+  - [x] 1.2 Declare 5 methods with full Javadoc:
     - `boolean isRunning()` — checks if the application server is running
     - `int getHttpPort()` — returns the HTTP port of the running server
     - `String getContextRoot()` — returns the context root of the application
     - `Path resolveOutputDir(String serverName, Path projectDir)` — resolves the exploded WAR output directory
     - `void writeServerConfig(ServerConfigParams params)` — writes server-specific JSF configuration
-  - [ ] 1.3 Document exception behavior: methods may throw `JsfAutoreloadException`
-- [ ] Task 2: Create `ServerConfigParams` POJO (AC: #2)
-  - [ ] 2.1 Create `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/server/ServerConfigParams.java`
-  - [ ] 2.2 Include fields: `Path outputDir`, `int mojarraRefreshPeriod`, `int myfacesRefreshPeriod`, `int port`
-  - [ ] 2.3 Use builder pattern or constructor for immutability
-  - [ ] 2.4 All fields accessible via getters, no setters
-- [ ] Task 3: Write unit tests (AC: #1, #2)
-  - [ ] 3.1 Create `ServerConfigParamsTest.java` to verify construction and getter access
-  - [ ] 3.2 Verify `ServerConfigParams` is immutable (no setters, fields final)
-- [ ] Task 4: Update old `ServerAdapter` reference in gradle-plugin (AC: #4)
-  - [ ] 4.1 The old `ServerAdapter.java` in `jsf-autoreload-gradle-plugin/src/main/java/it/bstz/jsfautoreload/server/` has only 3 methods — leave it in place for now; it will be replaced when LibertyServerAdapter migrates in Story 1.4
-  - [ ] 4.2 Ensure core compiles independently without any gradle-plugin code
+  - [x] 1.3 Document exception behavior: methods may throw `JsfAutoreloadException`
+- [x] Task 2: Create `ServerConfigParams` POJO (AC: #2)
+  - [x] 2.1 Create `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/server/ServerConfigParams.java`
+  - [x] 2.2 Include fields: `Path outputDir`, `int mojarraRefreshPeriod`, `int myfacesRefreshPeriod`, `int port`
+  - [x] 2.3 Use builder pattern or constructor for immutability
+  - [x] 2.4 All fields accessible via getters, no setters
+- [x] Task 3: Write unit tests (AC: #1, #2)
+  - [x] 3.1 Create `ServerConfigParamsTest.java` to verify construction and getter access
+  - [x] 3.2 Verify `ServerConfigParams` is immutable (no setters, fields final)
+- [x] Task 4: Update old `ServerAdapter` reference in gradle-plugin (AC: #4)
+  - [x] 4.1 The old `ServerAdapter.java` in `jsf-autoreload-gradle-plugin/src/main/java/it/bstz/jsfautoreload/server/` has only 3 methods — leave it in place for now; it will be replaced when LibertyServerAdapter migrates in Story 1.4
+  - [x] 4.2 Ensure core compiles independently without any gradle-plugin code
 
 ## Dev Notes
 
@@ -87,8 +87,34 @@ This interface is used by `LibertyServerAdapter` in the gradle-plugin module. Th
 
 ### Agent Model Used
 
+Claude Opus 4.6 (1M context)
+
 ### Debug Log References
+
+No issues encountered.
 
 ### Completion Notes List
 
+- Created expanded `ServerAdapter` interface in core with 5 methods, all with full Javadoc documenting contracts, parameters, and exceptions.
+- Created immutable `ServerConfigParams` with builder pattern — holds outputDir, mojarraRefreshPeriod, myfacesRefreshPeriod, port. All fields final, no setters.
+- Wrote 4 unit tests verifying builder construction, default values, custom refresh periods, and custom port.
+- Old gradle-plugin `ServerAdapter` left in place (3 methods) — will be replaced in Story 1.4.
+- Core module compiles independently with zero Gradle/Maven/Servlet imports.
+
 ### File List
+
+- New: `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/server/ServerAdapter.java`
+- New: `jsf-autoreload-core/src/main/java/it/bstz/jsfautoreload/server/ServerConfigParams.java`
+- New: `jsf-autoreload-core/src/test/java/it/bstz/jsfautoreload/server/ServerConfigParamsTest.java`
+
+## Code Review (AI)
+
+- **Reviewer:** Claude Opus 4.6 (1M context)
+- **Date:** 2026-03-21
+- **Result:** Pass — 1 issue found and fixed
+- **Fixed H4:** `ServerConfigParams.builder().build()` now validates outputDir is non-null, throwing `JsfAutoreloadConfigException`. Added test for validation.
+
+## Change Log
+
+- 2026-03-21: Code review complete — fixed H4 (outputDir null validation in ServerConfigParams builder), status changed to done.
+- 2026-03-16: Story implementation complete — created core ServerAdapter interface (5 methods with Javadoc) and immutable ServerConfigParams builder.

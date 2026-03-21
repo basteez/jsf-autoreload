@@ -43,13 +43,13 @@ development_status:
   # Epic 1: Core Module Extraction & Dev Loop Engine
   epic-1: in-progress
   1-1-four-module-project-scaffolding: done
-  1-2-core-exception-types: ready-for-dev
-  1-3-serveradapter-interface-and-serverconfigparams: ready-for-dev
-  1-4-libertyserveradapter-migration-to-core: ready-for-dev
-  1-5-devserverconfig-immutable-builder: ready-for-dev
-  1-6-filechangewatcher-extraction-to-core: ready-for-dev
-  1-7-devwebsocketserver-extraction-to-core: ready-for-dev
-  1-8-devserver-orchestrator: ready-for-dev
+  1-2-core-exception-types: done
+  1-3-serveradapter-interface-and-serverconfigparams: done
+  1-4-libertyserveradapter-migration-to-core: done
+  1-5-devserverconfig-immutable-builder: done
+  1-6-filechangewatcher-extraction-to-core: done
+  1-7-devwebsocketserver-extraction-to-core: done
+  1-8-devserver-orchestrator: done
   epic-1-retrospective: optional
 
   # Epic 2: Gradle + Liberty End-to-End Live-Reload

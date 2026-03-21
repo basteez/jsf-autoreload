@@ -115,14 +115,14 @@ public abstract class JsfDevTask extends DefaultTask {
         FileChangeWatcher finalSourceWatcher = sourceWatcher;
         ScheduledExecutorService finalCompileDebouncer = compileDebouncer;
         Thread shutdownHook = new Thread(() -> {
-            webappWatcher.stop();
+            webappWatcher.close();
             if (finalSourceWatcher != null) {
-                finalSourceWatcher.stop();
+                finalSourceWatcher.close();
             }
             if (finalCompileDebouncer != null) {
                 finalCompileDebouncer.shutdownNow();
             }
-            wsServer.stopServer();
+            wsServer.close();
             latch.countDown();
         });
         Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -134,14 +134,14 @@ public abstract class JsfDevTask extends DefaultTask {
         } finally {
             getLogger().lifecycle("[JSF Autoreload] Shutting down...");
             // Idempotent cleanup — may already be done by shutdown hook
-            webappWatcher.stop();
+            webappWatcher.close();
             if (sourceWatcher != null) {
-                sourceWatcher.stop();
+                sourceWatcher.close();
             }
             if (compileDebouncer != null) {
                 compileDebouncer.shutdownNow();
             }
-            wsServer.stopServer();
+            wsServer.close();
             stopLibertyServer();
             try {
                 Runtime.getRuntime().removeShutdownHook(shutdownHook);
