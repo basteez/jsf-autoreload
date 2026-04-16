@@ -255,7 +255,6 @@
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
-                            <excludeArtifacts>jsf-autoreload-integration-tests</excludeArtifacts>
                         </configuration>
                     </plugin>
                 </plugins>

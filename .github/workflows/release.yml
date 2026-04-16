@@ -31,7 +31,7 @@ jobs:
           mvn -B versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
 
       - name: Build, sign, and deploy
-        run: mvn -B -P release deploy
+        run: mvn -B -P release deploy -pl '!jsf-autoreload-integration-tests'
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
