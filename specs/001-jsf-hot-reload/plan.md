@@ -29,7 +29,7 @@ Build a JSF hot-reload plugin that monitors file changes (XHTML views, static re
 |-----------|--------|----------|
 | I. Plugin Modularity | PASS | Core is a self-contained JAR depending only on JSF spec API + Java SE. Container adapters are separate modules via SPI — no tight coupling to specific servers. |
 | II. Test-Driven Development | PASS | TDD (Red-Green-Refactor) will be enforced in all task definitions. Integration tests use embedded Tomcat. |
-| III. JSF Specification Compliance | PASS | Script injection via `SystemEventListener` on `PostAddToViewEvent` + auto-discovered `faces-config.xml`. No implementation internals used. |
+| III. JSF Specification Compliance | PASS | Script injection via `SystemEventListener` on `PostAddToViewEvent`, registered programmatically through `JsfBridge.registerScriptInjector()` (bridge creates the namespace-specific listener). No implementation internals used. |
 | IV. Zero Production Impact | PASS | `ServletContainerInitializer` checks dev mode at startup — returns immediately if not Development. `SystemEventListener` exits early. No servlets registered in production. |
 | V. Observability & Diagnostics | PASS | `java.util.logging` with structured format: `[JSF-AUTORELOAD] {level} \| {event_type} \| {file_path} \| {details}`. All events logged per FR-011. |
 

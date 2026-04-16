@@ -94,7 +94,19 @@ public final class BridgeDetector {
     public static BridgePair detect() { ... }
 }
 
-public record BridgePair(JsfBridge jsf, ServletBridge servlet) {}
+/** Simple holder for the detected bridge pair. Java 8 compatible. */
+public final class BridgePair {
+    private final JsfBridge jsf;
+    private final ServletBridge servlet;
+
+    public BridgePair(JsfBridge jsf, ServletBridge servlet) {
+        this.jsf = jsf;
+        this.servlet = servlet;
+    }
+
+    public JsfBridge jsf() { return jsf; }
+    public ServletBridge servlet() { return servlet; }
+}
 ```
 
 ## Implementation Packages
