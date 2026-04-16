@@ -154,7 +154,7 @@ A developer configures the plugin to customize watched directories, file pattern
 - By default, the developer's IDE or build tool handles Java compilation; the plugin only watches for `.class` file changes, not `.java` source files directly. When auto-compile mode is enabled, the plugin also watches `.java` sources and invokes the build tool.
 - The browser supports modern web standards (all current evergreen browsers).
 - The plugin is added as a Maven dependency; no standalone server or external process is required.
-- File system event notification is available on the target OS (Linux inotify, macOS FSEvents, Windows ReadDirectoryChanges). Polling fallback is provided for environments where native events are unavailable.
+- File system event notification is available on the target OS (Linux inotify, macOS FSEvents, Windows ReadDirectoryChanges). Polling fallback is out of scope for the initial release and may be added as a future enhancement if demand warrants it.
 - The plugin targets the same JVM process as the application server — it is deployed inside the WAR, not as a sidecar.
 - The plugin ships as a single artifact supporting both `javax.faces` (JSF 2.0–2.3) and `jakarta.faces` (JSF 3.0+) via runtime namespace detection. No separate modules or classifier variants are required.
 - The project uses a modular architecture (Maven multi-module): a core module containing the file watcher, SSE infrastructure, and container adapter SPI; a Tomcat adapter module shipped out of the box; additional container adapter modules (WildFly, Jetty, GlassFish, etc.) can be added independently without modifying the core.

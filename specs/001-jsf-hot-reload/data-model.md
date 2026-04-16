@@ -34,7 +34,7 @@ A filesystem path monitored for changes, with inclusion/exclusion filtering.
 | Field | Type | Default | Validation |
 |-------|------|---------|------------|
 | `path` | `Path` | — | Must exist and be a directory |
-| `inclusionPatterns` | `Set<String>` | `["**/*.xhtml", "**/*.css", "**/*.js", "**/*.class"]` | Valid glob patterns |
+| `inclusionPatterns` | `Set<String>` | `["**/*.xhtml", "**/*.jspx", "**/*.jsp", "**/*.css", "**/*.js", "**/*.png", "**/*.jpg", "**/*.gif", "**/*.svg", "**/*.ico", "**/*.woff", "**/*.woff2", "**/*.class"]` | Valid glob patterns |
 | `exclusionPatterns` | `Set<String>` | `["**/.*", "**/node_modules/**"]` | Valid glob patterns |
 | `recursive` | `boolean` | `true` | — |
 | `active` | `boolean` | `true` | — |
@@ -130,7 +130,7 @@ Interface for container-specific operations. Implemented by adapter modules.
 | Method | Description |
 |--------|-------------|
 | `boolean supports()` | Returns true if this adapter can handle the current container |
-| `void reload(ServletContext)` | Triggers a webapp context reload |
+| `void reload(Object context)` | Triggers a webapp context reload (bridge-abstracted servlet context) |
 | `String containerName()` | Human-readable container name for logging |
 
 **Discovery**: Via `ServiceLoader<ContainerAdapter>`. The first adapter where `supports()` returns `true` is selected.
