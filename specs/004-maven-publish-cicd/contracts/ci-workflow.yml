@@ -1,0 +1,32 @@
+# Contract: CI Workflow (ci.yml)
+#
+# This is the contract definition for the continuous integration workflow.
+# The actual workflow file will be at .github/workflows/ci.yml
+#
+# Trigger: Pull requests targeting main, pushes to main
+# JDK Matrix: [11, 21]
+# Steps: checkout → setup JDK → cache Maven → build + test
+# Target: CI feedback under 10 minutes
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [11, 21]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+      - run: mvn -B verify
