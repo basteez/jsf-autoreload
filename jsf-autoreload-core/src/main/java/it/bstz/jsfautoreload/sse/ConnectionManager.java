@@ -54,6 +54,18 @@ public class ConnectionManager {
         }
     }
 
+    public void sendHeartbeatToAll() {
+        for (BrowserConnection conn : connections) {
+            try {
+                conn.getAsyncContext().write(":heartbeat\n\n");
+            } catch (IOException e) {
+                ReloadLogger.fine("SSE_HEARTBEAT",
+                        "Removing dead connection: " + conn.getConnectionId());
+                remove(conn);
+            }
+        }
+    }
+
     public void closeAll() {
         for (BrowserConnection conn : connections) {
             try {

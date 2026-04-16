@@ -5,6 +5,8 @@ import it.bstz.jsfautoreload.bridge.ServletBridge;
 import it.bstz.jsfautoreload.sse.SseHandler;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -57,6 +59,34 @@ public class JavaxServletBridge implements ServletBridge {
                 @Override
                 public void contextDestroyed(ServletContextEvent sce) {
                     onShutdown.run();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void addAsyncListener(AsyncContextWrapper asyncContext, Runnable onComplete, Runnable onError, Runnable onTimeout) {
+        Object raw = asyncContext.getRawContext();
+        if (raw instanceof AsyncContext) {
+            ((AsyncContext) raw).addListener(new AsyncListener() {
+                @Override
+                public void onComplete(AsyncEvent event) {
+                    onComplete.run();
+                }
+
+                @Override
+                public void onError(AsyncEvent event) {
+                    onError.run();
+                }
+
+                @Override
+                public void onTimeout(AsyncEvent event) {
+                    onTimeout.run();
+                }
+
+                @Override
+                public void onStartAsync(AsyncEvent event) {
+                    // no-op
                 }
             });
         }

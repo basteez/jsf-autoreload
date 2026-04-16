@@ -9,4 +9,6 @@ public interface ServletBridge {
     AsyncContextWrapper startAsync(Object request, Object response);
 
     void registerShutdownListener(Object servletContext, Runnable onShutdown);
+
+    void addAsyncListener(AsyncContextWrapper asyncContext, Runnable onComplete, Runnable onError, Runnable onTimeout);
 }

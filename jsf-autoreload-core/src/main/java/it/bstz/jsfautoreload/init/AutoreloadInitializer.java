@@ -9,7 +9,6 @@ import it.bstz.jsfautoreload.core.Debouncer;
 import it.bstz.jsfautoreload.core.DirectoryWatcher;
 import it.bstz.jsfautoreload.core.ReloadCoordinator;
 import it.bstz.jsfautoreload.jsf.DevModeGuard;
-import it.bstz.jsfautoreload.jsf.ScriptInjector;
 import it.bstz.jsfautoreload.logging.ReloadLogger;
 import it.bstz.jsfautoreload.sse.ConnectionManager;
 import it.bstz.jsfautoreload.sse.DefaultSseHandler;
@@ -77,6 +76,9 @@ public class AutoreloadInitializer {
         // 4. SSE Handler + register servlet
         DefaultSseHandler sseHandler = new DefaultSseHandler(bridges.servlet(), connectionManager);
         bridges.servlet().registerServlet(servletContext, config.getSseEndpointPath(), sseHandler);
+
+        // 4b. ScriptInjector — deferred registration via ServletContext attributes
+        bridges.jsf().registerDeferredScriptInjector(servletContext, config.getSseEndpointPath());
 
         // 5. DirectoryWatcher(s)
         List<WatchedDirectory> dirs = config.getWatchedDirectories();

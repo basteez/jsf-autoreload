@@ -32,13 +32,18 @@ public class ReloadCoordinator implements Consumer<ReloadNotification> {
 
     @Override
     public void accept(ReloadNotification notification) {
-        // If class change, attempt context reload first
+        // Broadcast SSE notification to all connected browsers FIRST.
+        // For class changes, context reload destroys the SSE servlet and all connections,
+        // so browsers must receive the reload event before the context restarts.
+        connectionManager.broadcast(notification);
+
+        // If class change, reload the application context to pick up new classes.
+        // The context reload destroys all SSE connections. The client-side script detects
+        // the connection loss and triggers a page reload after a brief delay, so browsers
+        // refresh even if the SSE event didn't arrive before the connection was torn down.
         if (notification.isRequiresContextReload()) {
             handleContextReload(notification);
         }
-
-        // Broadcast SSE notification to all connected browsers
-        connectionManager.broadcast(notification);
     }
 
     private void handleContextReload(ReloadNotification notification) {

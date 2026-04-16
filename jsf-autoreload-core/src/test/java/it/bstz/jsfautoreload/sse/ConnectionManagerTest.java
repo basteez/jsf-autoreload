@@ -103,6 +103,40 @@ class ConnectionManagerTest {
         return new BrowserConnection(wrapper);
     }
 
+    @Test
+    void sendHeartbeatToAllSendsCommentToAllConnections() throws Exception {
+        ByteArrayOutputStream out1 = new ByteArrayOutputStream();
+        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+
+        BrowserConnection conn1 = createTestConnection(out1);
+        BrowserConnection conn2 = createTestConnection(out2);
+
+        connectionManager.add(conn1);
+        connectionManager.add(conn2);
+
+        connectionManager.sendHeartbeatToAll();
+
+        assertTrue(out1.toString("UTF-8").contains(":heartbeat"),
+                "First connection should receive heartbeat comment");
+        assertTrue(out2.toString("UTF-8").contains(":heartbeat"),
+                "Second connection should receive heartbeat comment");
+    }
+
+    @Test
+    void sendHeartbeatToAllRemovesDeadConnections() {
+        BrowserConnection deadConn = createDeadConnection();
+        BrowserConnection goodConn = createTestConnection();
+
+        connectionManager.add(deadConn);
+        connectionManager.add(goodConn);
+        assertEquals(2, connectionManager.getConnectionCount());
+
+        connectionManager.sendHeartbeatToAll();
+
+        assertEquals(1, connectionManager.getConnectionCount(),
+                "Dead connections should be removed after failed heartbeat");
+    }
+
     private BrowserConnection createDeadConnection() {
         java.io.OutputStream failingStream = new java.io.OutputStream() {
             @Override
