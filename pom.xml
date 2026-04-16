@@ -12,6 +12,30 @@
     <name>JSF Auto Reload</name>
     <description>JSF hot-reload plugin — monitors file changes and automatically refreshes the browser via SSE</description>
 
+    <url>https://github.com/basteez/jsf-autoreload</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>basteez</id>
+            <name>Tiziano Basile</name>
+            <email>tiziano.basile@nearform.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/basteez/jsf-autoreload.git</connection>
+        <developerConnection>scm:git:ssh://github.com:basteez/jsf-autoreload.git</developerConnection>
+        <url>https://github.com/basteez/jsf-autoreload</url>
+    </scm>
+
     <modules>
         <module>jsf-autoreload-core</module>
         <module>jsf-autoreload-tomcat</module>
