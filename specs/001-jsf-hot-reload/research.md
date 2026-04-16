@@ -58,8 +58,8 @@ The plugin interacts with a small surface area of the JSF/Servlet APIs:
 Approach:
 1. Define internal interfaces (`JsfBridge`, `ServletBridge`) abstracting namespace-specific operations
 2. Provide two implementations in separate packages:
-   - `com.jsfautoreload.bridge.javax` — imports `javax.faces.*`, `javax.servlet.*`
-   - `com.jsfautoreload.bridge.jakarta` — imports `jakarta.faces.*`, `jakarta.servlet.*`
+   - `it.bstz.jsfautoreload.bridge.javax` — imports `javax.faces.*`, `javax.servlet.*`
+   - `it.bstz.jsfautoreload.bridge.jakarta` — imports `jakarta.faces.*`, `jakarta.servlet.*`
 3. At startup, use `Class.forName("jakarta.faces.context.FacesContext")` to detect namespace
 4. Instantiate the appropriate bridge implementation
 5. All core logic works through bridge interfaces — never imports javax/jakarta directly
@@ -267,7 +267,7 @@ Dependency graph:
 - `maven-plugin` → Maven Plugin API, Maven Project API
 - `integration-tests` → `core`, `tomcat`, Embedded Tomcat (test)
 
-Base package: `com.jsfautoreload`
+Base package: `it.bstz.jsfautoreload`
 
 **Alternatives considered**:
 - Single module: Rejected — FR-012 explicitly requires modular architecture

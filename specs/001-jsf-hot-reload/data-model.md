@@ -22,7 +22,7 @@ Represents the complete set of user-defined and default settings controlling plu
 
 **Sources** (read in order, later overrides earlier):
 1. Built-in defaults
-2. `web.xml` context-params (prefix: `com.jsfautoreload.`)
+2. `web.xml` context-params (prefix: `it.bstz.jsfautoreload.`)
 3. System properties (prefix: `jsfautoreload.`)
 
 **Relationships**: Contains one or more `WatchedDirectory` entries.

@@ -7,14 +7,14 @@
 ## Interface Definition
 
 ```java
-package com.jsfautoreload.spi;
+package it.bstz.jsfautoreload.spi;
 
 /**
  * Service Provider Interface for container-specific operations.
  *
  * Implementations are discovered via {@link java.util.ServiceLoader}.
  * Each adapter module must include a
- * {@code META-INF/services/com.jsfautoreload.spi.ContainerAdapter} file
+ * {@code META-INF/services/it.bstz.jsfautoreload.spi.ContainerAdapter} file
  * listing its implementation class.
  *
  * The first adapter where {@link #supports()} returns {@code true}
@@ -77,7 +77,7 @@ public interface ContainerAdapter {
 ## Exception
 
 ```java
-package com.jsfautoreload.spi;
+package it.bstz.jsfautoreload.spi;
 
 public class ReloadException extends Exception {
     public ReloadException(String message) { super(message); }
@@ -90,12 +90,12 @@ public class ReloadException extends Exception {
 Each adapter module includes:
 
 ```
-META-INF/services/com.jsfautoreload.spi.ContainerAdapter
+META-INF/services/it.bstz.jsfautoreload.spi.ContainerAdapter
 ```
 
 Contents (one fully-qualified class name per line):
 ```
-com.jsfautoreload.tomcat.TomcatAdapter
+it.bstz.jsfautoreload.tomcat.TomcatAdapter
 ```
 
 ## Adapter Selection Algorithm
@@ -109,7 +109,7 @@ com.jsfautoreload.tomcat.TomcatAdapter
 ## Tomcat Adapter (Reference Implementation)
 
 **Module**: `jsf-autoreload-tomcat`
-**Class**: `com.jsfautoreload.tomcat.TomcatAdapter`
+**Class**: `it.bstz.jsfautoreload.tomcat.TomcatAdapter`
 
 ```java
 public class TomcatAdapter implements ContainerAdapter {
@@ -145,5 +145,5 @@ To add support for a new container (e.g., WildFly):
 1. Create a new Maven module: `jsf-autoreload-wildfly`
 2. Add dependency on `jsf-autoreload-core` and WildFly APIs (provided)
 3. Implement `ContainerAdapter`
-4. Register in `META-INF/services/com.jsfautoreload.spi.ContainerAdapter`
+4. Register in `META-INF/services/it.bstz.jsfautoreload.spi.ContainerAdapter`
 5. No changes to the core module required

@@ -11,7 +11,7 @@ These interfaces abstract over the `javax.faces` / `jakarta.faces` and `javax.se
 ## JsfBridge Interface
 
 ```java
-package com.jsfautoreload.bridge;
+package it.bstz.jsfautoreload.bridge;
 
 /**
  * Abstraction over JSF namespace differences.
@@ -45,7 +45,7 @@ public interface JsfBridge {
 ## ServletBridge Interface
 
 ```java
-package com.jsfautoreload.bridge;
+package it.bstz.jsfautoreload.bridge;
 
 /**
  * Abstraction over Servlet API namespace differences.
@@ -78,7 +78,7 @@ public interface ServletBridge {
 ## Bridge Detection
 
 ```java
-package com.jsfautoreload.bridge;
+package it.bstz.jsfautoreload.bridge;
 
 public final class BridgeDetector {
 
@@ -100,13 +100,13 @@ public record BridgePair(JsfBridge jsf, ServletBridge servlet) {}
 ## Implementation Packages
 
 ### javax bridge
-- `com.jsfautoreload.bridge.javax.JavaxJsfBridge` implements `JsfBridge`
-- `com.jsfautoreload.bridge.javax.JavaxServletBridge` implements `ServletBridge`
+- `it.bstz.jsfautoreload.bridge.javax.JavaxJsfBridge` implements `JsfBridge`
+- `it.bstz.jsfautoreload.bridge.javax.JavaxServletBridge` implements `ServletBridge`
 - Imports: `javax.faces.*`, `javax.servlet.*`
 
 ### jakarta bridge
-- `com.jsfautoreload.bridge.jakarta.JakartaJsfBridge` implements `JsfBridge`
-- `com.jsfautoreload.bridge.jakarta.JakartaServletBridge` implements `ServletBridge`
+- `it.bstz.jsfautoreload.bridge.jakarta.JakartaJsfBridge` implements `JsfBridge`
+- `it.bstz.jsfautoreload.bridge.jakarta.JakartaServletBridge` implements `ServletBridge`
 - Imports: `jakarta.faces.*`, `jakarta.servlet.*`
 
 ## Important Constraints

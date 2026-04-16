@@ -79,7 +79,7 @@ jsf-autoreload/                                    # Parent POM (packaging: pom)
 │   ├── pom.xml
 │   └── src/
 │       ├── main/
-│       │   ├── java/com/jsfautoreload/
+│       │   ├── java/it/bstz/jsfautoreload/
 │       │   │   ├── core/
 │       │   │   │   ├── DirectoryWatcher.java      # File system monitoring (WatchService)
 │       │   │   │   ├── Debouncer.java             # Time-window debounce (ScheduledExecutorService)
@@ -123,7 +123,7 @@ jsf-autoreload/                                    # Parent POM (packaging: pom)
 │       │       │   ├── javax.servlet.ServletContainerInitializer
 │       │       │   └── jakarta.servlet.ServletContainerInitializer
 │       │       └── web-fragment.xml               # Marks async-supported=true
-│       └── test/java/com/jsfautoreload/
+│       └── test/java/it/bstz/jsfautoreload/
 │           ├── core/
 │           │   ├── DirectoryWatcherTest.java
 │           │   └── DebouncerTest.java
@@ -140,26 +140,26 @@ jsf-autoreload/                                    # Parent POM (packaging: pom)
 │   ├── pom.xml
 │   └── src/
 │       ├── main/
-│       │   ├── java/com/jsfautoreload/tomcat/
+│       │   ├── java/it/bstz/jsfautoreload/tomcat/
 │       │   │   └── TomcatAdapter.java             # Implements ContainerAdapter
 │       │   └── resources/META-INF/services/
-│       │       └── com.jsfautoreload.spi.ContainerAdapter
-│       └── test/java/com/jsfautoreload/tomcat/
+│       │       └── it.bstz.jsfautoreload.spi.ContainerAdapter
+│       └── test/java/it/bstz/jsfautoreload/tomcat/
 │           └── TomcatAdapterTest.java
 │
 ├── jsf-autoreload-maven-plugin/                   # Maven plugin (auto-compile)
 │   ├── pom.xml
 │   └── src/
-│       ├── main/java/com/jsfautoreload/maven/
+│       ├── main/java/it/bstz/jsfautoreload/maven/
 │       │   ├── AutoCompileMojo.java               # Watches .java, invokes compiler
 │       │   └── WatchMojo.java                     # Runs the watcher as Maven goal
-│       └── test/java/com/jsfautoreload/maven/
+│       └── test/java/it/bstz/jsfautoreload/maven/
 │           └── AutoCompileMojoTest.java
 │
 └── jsf-autoreload-integration-tests/              # Integration tests (not published)
     ├── pom.xml
     └── src/test/
-        ├── java/com/jsfautoreload/it/
+        ├── java/it/bstz/jsfautoreload/it/
         │   ├── XhtmlReloadIT.java
         │   ├── StaticResourceReloadIT.java
         │   ├── ClassReloadIT.java
@@ -170,7 +170,7 @@ jsf-autoreload/                                    # Parent POM (packaging: pom)
             └── test-webapp/                       # Minimal JSF app for testing
 ```
 
-**Structure Decision**: Maven multi-module with four modules. Core is the self-contained library (constitution I). Tomcat adapter is the reference container adapter (FR-012). Maven plugin enables auto-compile (FR-013/014). Integration tests verify end-to-end behavior with embedded Tomcat. Base package: `com.jsfautoreload`.
+**Structure Decision**: Maven multi-module with four modules. Core is the self-contained library (constitution I). Tomcat adapter is the reference container adapter (FR-012). Maven plugin enables auto-compile (FR-013/014). Integration tests verify end-to-end behavior with embedded Tomcat. Base package: `it.bstz.jsfautoreload`.
 
 ## Complexity Tracking
 

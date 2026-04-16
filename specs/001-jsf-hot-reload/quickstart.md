@@ -14,14 +14,14 @@ Add the core plugin and your container adapter to your WAR's `pom.xml`:
 ```xml
 <!-- Core plugin (required) -->
 <dependency>
-    <groupId>com.jsfautoreload</groupId>
+    <groupId>it.bstz</groupId>
     <artifactId>jsf-autoreload-core</artifactId>
     <version>${jsf-autoreload.version}</version>
 </dependency>
 
 <!-- Tomcat adapter (if running on Tomcat) -->
 <dependency>
-    <groupId>com.jsfautoreload</groupId>
+    <groupId>it.bstz</groupId>
     <artifactId>jsf-autoreload-tomcat</artifactId>
     <version>${jsf-autoreload.version}</version>
 </dependency>
@@ -56,25 +56,25 @@ Add context parameters to `web.xml` for non-standard project layouts:
 ```xml
 <!-- Disable the plugin explicitly -->
 <context-param>
-    <param-name>com.jsfautoreload.enabled</param-name>
+    <param-name>it.bstz.jsfautoreload.enabled</param-name>
     <param-value>false</param-value>
 </context-param>
 
 <!-- Custom watched directories (comma-separated) -->
 <context-param>
-    <param-name>com.jsfautoreload.watchDirs</param-name>
+    <param-name>it.bstz.jsfautoreload.watchDirs</param-name>
     <param-value>src/main/webapp,src/main/resources</param-value>
 </context-param>
 
 <!-- Custom debounce interval in milliseconds -->
 <context-param>
-    <param-name>com.jsfautoreload.debounceMs</param-name>
+    <param-name>it.bstz.jsfautoreload.debounceMs</param-name>
     <param-value>300</param-value>
 </context-param>
 
 <!-- Exclusion patterns (comma-separated globs) -->
 <context-param>
-    <param-name>com.jsfautoreload.excludePatterns</param-name>
+    <param-name>it.bstz.jsfautoreload.excludePatterns</param-name>
     <param-value>**/.git/**,**/node_modules/**</param-value>
 </context-param>
 ```
@@ -86,7 +86,7 @@ For a Quarkus-like experience where `.java` changes are automatically compiled:
 ```xml
 <!-- In pom.xml build plugins section -->
 <plugin>
-    <groupId>com.jsfautoreload</groupId>
+    <groupId>it.bstz</groupId>
     <artifactId>jsf-autoreload-maven-plugin</artifactId>
     <version>${jsf-autoreload.version}</version>
     <configuration>
@@ -100,7 +100,7 @@ For a Quarkus-like experience where `.java` changes are automatically compiled:
 
 The plugin is completely inert when:
 - `javax.faces.PROJECT_STAGE` / `jakarta.faces.PROJECT_STAGE` is not `Development`
-- `com.jsfautoreload.enabled` is set to `false`
+- `it.bstz.jsfautoreload.enabled` is set to `false`
 
 No servlets are registered, no file watchers start, no scripts are injected. Zero overhead.
 
