@@ -3,7 +3,7 @@
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_3.xsd"
               version="2.3">
-    <!-- Auto-discovered marker. ScriptInjector is registered programmatically
-         via JsfBridge.registerScriptInjector in AutoreloadInitializer to avoid
-         namespace-specific imports in core. -->
+    <!-- Auto-discovered marker. ScriptInjector deferred registration is handled
+         programmatically via ServletContextListener added in JsfBridge.registerDeferredScriptInjector()
+         to avoid namespace-specific class declarations that break cross-namespace deployments. -->
 </faces-config>

@@ -6,5 +6,7 @@ public interface JsfBridge {
 
     void registerScriptInjector(Object application, String scriptContent);
 
+    void registerDeferredScriptInjector(Object servletContext, String sseEndpointPath);
+
     String projectStageParamName();
 }

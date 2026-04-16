@@ -34,6 +34,14 @@ public class DefaultSseHandler implements SseHandler {
             BrowserConnection connection = new BrowserConnection(asyncContext);
             connectionManager.add(connection);
 
+            // Register AsyncListener for proactive connection cleanup
+            Runnable removeCallback = () -> {
+                connectionManager.remove(connection);
+                ReloadLogger.fine("SSE_ASYNC_LISTENER",
+                        "Connection removed via AsyncListener: " + connection.getConnectionId());
+            };
+            servletBridge.addAsyncListener(asyncContext, removeCallback, removeCallback, removeCallback);
+
             // Send initial :ok comment
             connectionManager.sendComment(connection, "ok");
 
@@ -68,7 +76,7 @@ public class DefaultSseHandler implements SseHandler {
 
     private void startHeartbeat() {
         heartbeatScheduler.scheduleAtFixedRate(() -> {
-            // No-op if no connections; the comment keeps proxies from closing idle connections
+            connectionManager.sendHeartbeatToAll();
         }, 30, 30, TimeUnit.SECONDS);
     }
 }

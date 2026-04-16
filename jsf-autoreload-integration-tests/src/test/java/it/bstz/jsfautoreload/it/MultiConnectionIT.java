@@ -50,4 +50,46 @@ class MultiConnectionIT {
                     "Connection " + i + " should receive the reload event");
         }
     }
+
+    @Test
+    void connectionsSurviveHeartbeatAndReceiveSubsequentBroadcast() throws Exception {
+        ConnectionManager connectionManager = new ConnectionManager();
+        List<ByteArrayOutputStream> outputs = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            AsyncContextWrapper wrapper = new AsyncContextWrapper(new Object(), out, () -> {});
+            BrowserConnection conn = new BrowserConnection(wrapper);
+            connectionManager.add(conn);
+            outputs.add(out);
+        }
+
+        assertEquals(5, connectionManager.getConnectionCount());
+
+        // Simulate heartbeat (as would happen during idle period)
+        connectionManager.sendHeartbeatToAll();
+
+        // All connections should still be alive
+        assertEquals(5, connectionManager.getConnectionCount(),
+                "All connections should survive heartbeat");
+
+        // Verify heartbeat was sent
+        for (int i = 0; i < outputs.size(); i++) {
+            assertTrue(outputs.get(i).toString("UTF-8").contains(":heartbeat"),
+                    "Connection " + i + " should have received heartbeat");
+        }
+
+        // Now trigger a reload — connections should still receive it
+        ReloadNotification notification = new ReloadNotification(
+                Paths.get("test.xhtml"), ChangeType.MODIFIED, FileCategory.VIEW,
+                Instant.now(), false);
+
+        connectionManager.broadcast(notification);
+
+        for (int i = 0; i < outputs.size(); i++) {
+            String content = outputs.get(i).toString("UTF-8");
+            assertTrue(content.contains("event: reload"),
+                    "Connection " + i + " should receive reload event after heartbeat");
+        }
+    }
 }

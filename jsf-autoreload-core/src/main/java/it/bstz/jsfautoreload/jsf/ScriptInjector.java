@@ -9,7 +9,15 @@ public final class ScriptInjector {
             "(function(){" +
             "if(typeof EventSource==='undefined')return;" +
             "var es=new EventSource('%s');" +
-            "es.addEventListener('reload',function(e){location.reload();});" +
+            "var c=false;" +
+            "es.onopen=function(){c=true;};" +
+            "es.addEventListener('reload',function(){location.reload();});" +
+            "es.onerror=function(){" +
+              "if(c){" +
+                "es.close();" +
+                "setTimeout(function(){location.reload();},1000);" +
+              "}" +
+            "};" +
             "})();";
 
     private final JsfBridge jsfBridge;
