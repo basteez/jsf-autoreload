@@ -9,7 +9,7 @@ Build a JSF hot-reload plugin that monitors file changes (XHTML views, static re
 
 ## Technical Context
 
-**Language/Version**: Java 11+ (LTS baseline per constitution; resolves spec conflict — see [research.md](./research.md) Task 1)
+**Language/Version**: Java 8+ (compile with `--release 8`; single artifact runs on 8, 11, 17, 21+; multi-target CI/CD builds later if needed)
 **Primary Dependencies**: JSF API (javax.faces 2.3 / jakarta.faces 3.0+), Servlet API 3.0+ — all `provided` scope
 **Storage**: N/A (file system watching only, no persistent storage)
 **Testing**: JUnit 5 (unit tests), Embedded Tomcat (integration tests), TDD mandatory per constitution
@@ -37,7 +37,7 @@ Build a JSF hot-reload plugin that monitors file changes (XHTML views, static re
 
 | Conflict | Spec Says | Constitution Says | Resolution |
 |----------|-----------|-------------------|------------|
-| Java version | Java 8 (`--release 8`) | Java 11+ (LTS baseline) | **Constitution prevails** — authoritative governance doc. See research Task 1. |
+| Java version | Java 8 (`--release 8`) | ~~Java 11+~~ → Java 8+ (amended v1.0.1) | **Spec prevails** — constitution amended to align. Legacy JSF shops need Java 8 support. |
 | JSF range | JSF 2.0–2.3 | JSF 2.3 | **Constitution prevails** — JSF 2.3 is the last javax.faces release; 2.0/2.1 API differences add complexity for negligible user base. |
 
 ### Post-Phase 1 Check

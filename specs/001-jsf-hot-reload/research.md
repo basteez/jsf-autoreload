@@ -3,26 +3,23 @@
 **Feature Branch**: `001-jsf-hot-reload`
 **Date**: 2026-04-16
 
-## Research Task 1: Java Version — Resolve Spec vs Constitution Conflict
+## Research Task 1: Java Version
 
-**Context**: The feature spec (clarifications session) states Java 8 minimum (`--release 8`). The constitution (Technical Constraints) states Java 11+ (LTS baseline). These are in direct conflict.
+**Context**: The feature spec states Java 8 minimum (`--release 8`), single artifact running on Java 8, 11, 17, 21+, with multi-target JDK-optimized builds added later via CI/CD. The constitution has been amended to align (v1.0.1).
 
-**Decision**: Java 11+ (aligning with the constitution)
+**Decision**: Java 8+ (compile with `--release 8`)
 
 **Rationale**:
-- The constitution is the authoritative governance document and explicitly mandates Java 11+ as the LTS baseline.
-- Java 8 reached end of public updates in March 2019 (Oracle). Java 11 has been the industry minimum for years.
-- Java 11 provides critical improvements for this project:
-  - Improved `java.nio.file.WatchService` reliability
-  - Better container and module system support
-  - `var` keyword for cleaner code
-  - `java.net.http.HttpClient` (useful in integration tests)
-- The target audience (JSF developers doing active development) is on application servers that support Java 11+ (Tomcat 9+, WildFly 26+, etc.).
-- The feature spec's Java 8 target is superseded by the constitution's Java 11+ constraint.
+- The plugin targets legacy JSF projects — many of which still run on Java 8. Requiring Java 11+ would exclude a significant portion of the target audience.
+- Compiling with `--release 8` ensures bytecode and API compatibility with Java 8 while allowing development on modern JDKs.
+- `java.nio.file.WatchService` (the most critical API for this project) is available since Java 7.
+- Multi-target JDK-optimized builds (e.g., using `java.net.http.HttpClient` on Java 11+) can be introduced later via CI/CD profiles if performance profiling warrants it.
+- Single artifact, no classifier variants — keeps the dependency story simple for consumers.
 
 **Alternatives considered**:
-- Java 8: Rejected — constitution conflict, increasing maintenance burden, negligible real-world benefit
-- Java 17: Considered but overly restrictive — many JSF shops still run Java 11
+- Java 11+: Rejected — excludes legacy JSF shops still on Java 8, which are the primary audience for this plugin
+- Java 17+: Rejected — overly restrictive for a plugin targeting legacy projects
+- Separate artifacts per Java version: Rejected — adds maintenance burden; multi-release JAR or CI/CD profiles are simpler
 
 ## Research Task 2: JSF Version Range — Resolve Spec vs Constitution Conflict
 

@@ -100,7 +100,9 @@ and erode trust in the tool.
 
 ## Technical Constraints
 
-- **Java version**: Java 11+ (LTS baseline)
+- **Java version**: Java 8+ (compile with `--release 8`). Single
+  artifact runs on Java 8, 11, 17, 21+. Multi-target JDK-optimized
+  builds may be introduced via CI/CD if performance profiling warrants
 - **JSF versions**: JSF 2.3 (javax.faces) and Jakarta Faces 3.0+
   (jakarta.faces) MUST both be supported or clearly documented as
   separate modules
@@ -156,4 +158,4 @@ agreements.
 adherence to this constitution. Deviations MUST be justified in the
 Complexity Tracking section of the implementation plan.
 
-**Version**: 1.0.0 | **Ratified**: 2026-04-16 | **Last Amended**: 2026-04-16
+**Version**: 1.0.1 | **Ratified**: 2026-04-16 | **Last Amended**: 2026-04-16
