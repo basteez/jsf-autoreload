@@ -1,10 +1,23 @@
+---
+layout: default
+title: jsf-autoreload
+nav_order: 1
+---
+
 # jsf-autoreload
+{: .fs-9 }
 
 JSF hot-reload plugin — monitors file changes and automatically refreshes the browser via SSE.
+{: .fs-6 .fw-300 }
 
-**Documentation**: [https://basteez.github.io/jsf-autoreload/](https://basteez.github.io/jsf-autoreload/)
+---
 
-## Features
+- TOC
+{:toc}
+
+---
+
+## Key Features
 
 - **XHTML page reload** — detects changes to `.xhtml` Facelets pages and triggers a browser refresh
 - **CSS/JS static resource reload** — watches static resources under JSF resource directories
@@ -23,39 +36,34 @@ JSF hot-reload plugin — monitors file changes and automatically refreshes the 
 | Tomcat | Officially supported |
 | Other containers | Servlet 3.0+ containers (e.g., Jetty, WildFly) may work but are untested |
 
-## Module Structure
+## Getting Started
 
-| Module | ArtifactId | Description |
-|--------|------------|-------------|
-| Core | `jsf-autoreload-core` | Core library — SSE handler, file watcher, configuration, JSF bridge |
-| Tomcat Adapter | `jsf-autoreload-tomcat` | Tomcat container adapter |
-| Maven Plugin | `jsf-autoreload-maven-plugin` | Maven plugin — `watch` and `auto-compile` goals |
-| Integration Tests | `jsf-autoreload-integration-tests` | End-to-end tests with embedded Tomcat |
+### 1. Add dependencies
 
-## Quick Start
-
-**1. Add dependencies** to your `pom.xml`:
+Add the following to your `pom.xml`:
 
 ```xml
 <dependency>
     <groupId>it.bstz</groupId>
     <artifactId>jsf-autoreload-core</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 <dependency>
     <groupId>it.bstz</groupId>
     <artifactId>jsf-autoreload-tomcat</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
-**2. Add the Maven plugin** to your `<build><plugins>` section:
+### 2. Add the Maven plugin
+
+Add to your `<build><plugins>` section:
 
 ```xml
 <plugin>
     <groupId>it.bstz</groupId>
     <artifactId>jsf-autoreload-maven-plugin</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <executions>
         <execution>
             <goals>
@@ -66,7 +74,7 @@ JSF hot-reload plugin — monitors file changes and automatically refreshes the 
 </plugin>
 ```
 
-**3. Run** the watch goal:
+### 3. Run the watch goal
 
 ```sh
 mvn jsf-autoreload:watch
@@ -74,7 +82,7 @@ mvn jsf-autoreload:watch
 
 The plugin will monitor your source directory for changes and automatically recompile and refresh the browser.
 
-## javax vs jakarta
+### javax vs jakarta
 
 The plugin supports both the legacy `javax.faces` and the modern `jakarta.faces` namespaces:
 
@@ -82,6 +90,15 @@ The plugin supports both the legacy `javax.faces` and the modern `jakarta.faces`
 - **Jakarta Faces 3.0+** — use `jakarta.faces-api` and `jakarta.servlet-api` dependencies
 
 The core library auto-detects the active namespace at runtime via `BridgeDetector` — no manual configuration is required.
+
+## Modules
+
+| Module | ArtifactId | Description |
+|--------|------------|-------------|
+| Core | `jsf-autoreload-core` | Core library — SSE handler, file watcher, configuration, JSF bridge |
+| Tomcat Adapter | `jsf-autoreload-tomcat` | Tomcat container adapter |
+| Maven Plugin | `jsf-autoreload-maven-plugin` | Maven plugin — `watch` and `auto-compile` goals |
+| Integration Tests | `jsf-autoreload-integration-tests` | End-to-end tests with embedded Tomcat |
 
 ## Configuration Reference
 
@@ -138,18 +155,3 @@ Or via system property:
    ```sh
    mvn verify
    ```
-
-## Development Workflow
-
-This project uses [Speckit](https://github.com/basteez/speckit) for feature planning. The full workflow for new features is:
-
-1. **Specify** — define the feature spec (`/speckit-specify`)
-2. **Plan** — create the implementation plan (`/speckit-plan`)
-3. **Tasks** — generate the task breakdown (`/speckit-tasks`)
-4. **Implement** — execute the tasks (`/speckit-implement`)
-
-The full workflow is expected for new features. For smaller contributions like bug fixes and documentation improvements, you can skip the planning steps and contribute directly.
-
-## License
-
-This project is licensed under the [Apache License 2.0](LICENSE).

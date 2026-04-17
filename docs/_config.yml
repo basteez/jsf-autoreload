@@ -1,0 +1,14 @@
+title: jsf-autoreload
+description: JSF hot-reload plugin — monitors file changes and automatically refreshes the browser via SSE.
+baseurl: /jsf-autoreload
+url: https://basteez.github.io
+
+theme: just-the-docs
+
+heading_anchors: true
+back_to_top: true
+color_scheme: light
+
+aux_links:
+  GitHub: https://github.com/basteez/jsf-autoreload
+aux_links_new_tab: true
